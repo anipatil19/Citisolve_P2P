@@ -7,7 +7,8 @@ import {
   Info,
   ShieldAlert,
 } from 'lucide-react';
-import {COMPLAINT_LIFECYCLE_STAGES, SEVERITY_CONFIG} from '../../constants/civicDomain';
+import {SEVERITY_CONFIG} from '../../constants/civicDomain';
+import {useTranslation} from '../../i18n/useTranslation';
 import type {ComplaintLifecycleStage, SafetySeverity} from '../../types/civic';
 
 export const SeverityLabel: React.FC<{
@@ -15,6 +16,8 @@ export const SeverityLabel: React.FC<{
   compact?: boolean;
 }> = ({severity, compact = false}) => {
   const cfg = SEVERITY_CONFIG[severity];
+  const {tSev} = useTranslation();
+  const label = tSev(severity);
 
   const Icon =
     severity === 'critical'
@@ -30,7 +33,7 @@ export const SeverityLabel: React.FC<{
       className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap shrink-0 ${cfg.badgeBg} ${cfg.badgeText} ${cfg.borderClass}`}
     >
       <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-      <span>{compact ? cfg.label : `Severity: ${cfg.label}`}</span>
+      <span>{compact ? label : `${label}`}</span>
     </span>
   );
 };
@@ -38,8 +41,8 @@ export const SeverityLabel: React.FC<{
 export const ResolutionStatusLabel: React.FC<{
   status: ComplaintLifecycleStage;
 }> = ({status}) => {
-  const stage = COMPLAINT_LIFECYCLE_STAGES.find((s) => s.id === status);
-  const label = stage?.label ?? status;
+  const {ts} = useTranslation();
+  const label = ts(status);
 
   const isConfirmed = status === 'resolution_confirmed';
   const isAwaiting = status === 'resolved_awaiting_confirmation';

@@ -7,8 +7,8 @@ import {
 } from '../../components/common/SeverityAndStatus';
 import {OfficialWardMap} from '../../components/official/OfficialWardMap';
 import {SolvedSuccessModal} from '../../components/official/SolvedSuccessModal';
-import {CATEGORY_MAP} from '../../constants/civicDomain';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 import type {CivicIssue, SafetySeverity} from '../../types/civic';
 import {
   getComplaintAgeLabel,
@@ -24,6 +24,7 @@ export const WardMapSeverityPage: React.FC = () => {
     resolveOfficialComplaint,
   } = useCitiSolve();
   const navigate = useNavigate();
+  const {t, tc, tSev, tDept} = useTranslation();
 
   const [severityFilter, setSeverityFilter] = useState<'all' | SafetySeverity>('all');
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
@@ -69,20 +70,19 @@ export const WardMapSeverityPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-[#0F172A] sm:text-2xl">
-            1. Ward Map View &amp; Complaint Severity
+            {t('ward.mapTitle')}
           </h1>
           <p className="mt-0.5 text-xs text-slate-600">
-            Live OpenStreetMap pins &amp; severity triage for{' '}
-            <strong className="text-[#0F766E]">
-              {currentOfficial?.authorizedWards.join(', ')}
-            </strong>
+            {t('ward.mapSubtitle', {
+              wards: currentOfficial?.authorizedWards.join(', ') ?? '',
+            })}
           </p>
         </div>
         <Link
           to="/official/ward-track"
           className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-3 text-xs font-semibold text-[#0F766E] hover:bg-slate-50"
         >
-          <span>Department &amp; Report Track</span>
+          <span>{t('ward.trackTitle')}</span>
           <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -99,7 +99,7 @@ export const WardMapSeverityPage: React.FC = () => {
           }`}
         >
           <p className="text-[11px] font-semibold uppercase text-slate-500">
-            All Active
+            {t('ward.allActive')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-[#0F172A]">
             {severityCounts.critical +
@@ -119,7 +119,7 @@ export const WardMapSeverityPage: React.FC = () => {
           }`}
         >
           <p className="text-[11px] font-semibold uppercase text-red-700">
-            Critical
+            {tSev('critical')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-red-700">
             {severityCounts.critical}
@@ -136,7 +136,7 @@ export const WardMapSeverityPage: React.FC = () => {
           }`}
         >
           <p className="text-[11px] font-semibold uppercase text-orange-700">
-            High
+            {tSev('high')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-orange-700">
             {severityCounts.high}
@@ -153,7 +153,7 @@ export const WardMapSeverityPage: React.FC = () => {
           }`}
         >
           <p className="text-[11px] font-semibold uppercase text-amber-800">
-            Medium
+            {tSev('medium')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-amber-800">
             {severityCounts.medium}
@@ -170,7 +170,7 @@ export const WardMapSeverityPage: React.FC = () => {
           }`}
         >
           <p className="text-[11px] font-semibold uppercase text-emerald-700">
-            Low
+            {tSev('low')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-emerald-700">
             {severityCounts.low}
@@ -193,7 +193,7 @@ export const WardMapSeverityPage: React.FC = () => {
 
         <aside className="rounded-lg border border-[#E2E8F0] bg-white p-4 space-y-3 lg:col-span-4">
           <h2 className="font-display text-sm font-bold text-[#0F172A]">
-            Selected Ward Issue
+            {t('ward.selectedIssue')}
           </h2>
           {selectedIssue ? (
             <div className="space-y-3 text-xs">
@@ -217,12 +217,12 @@ export const WardMapSeverityPage: React.FC = () => {
                   <span>{selectedIssue.approximateArea}</span>
                 </p>
                 <p className="text-slate-600">
-                  <strong>Auto-Assigned Dept:</strong>{' '}
-                  {selectedIssue.assignedDepartments.join(' + ')}
+                  <strong>{t('offMap.deptLabel')}</strong>{' '}
+                  {selectedIssue.assignedDepartments.map((d) => tDept(d)).join(' + ')}
                 </p>
                 <p className="text-slate-600">
-                  <strong>Category:</strong>{' '}
-                  {CATEGORY_MAP[selectedIssue.category].label}
+                  <strong>{t('offMap.categoryLabel')}</strong>{' '}
+                  {tc(selectedIssue.category)}
                 </p>
               </div>
 
@@ -234,7 +234,7 @@ export const WardMapSeverityPage: React.FC = () => {
                     className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-md bg-[#0F9D58] px-3 text-xs font-bold text-white hover:bg-[#0B8043] cursor-pointer"
                   >
                     <CheckCircle2 className="h-4 w-4" />
-                    <span>Mark as Solved</span>
+                    <span>{t('ward.markSolvedQuick')}</span>
                   </button>
                 )}
 
@@ -242,14 +242,14 @@ export const WardMapSeverityPage: React.FC = () => {
                   to={`/official/complaints/${selectedIssue.id}`}
                   className="inline-flex min-h-9 w-full items-center justify-center gap-1 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-xs font-semibold text-[#0F766E] hover:bg-slate-100"
                 >
-                  <span>Inspect Full Dossier</span>
+                  <span>{t('offMap.openDossier')}</span>
                   <ArrowUpRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
             </div>
           ) : (
             <p className="text-xs text-slate-500">
-              All complaints matching this severity filter are solved.
+              {t('ward.allFilteredSolved')}
             </p>
           )}
         </aside>
@@ -259,16 +259,16 @@ export const WardMapSeverityPage: React.FC = () => {
       <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-base font-bold text-[#0F172A]">
-            Active Ward Complaints by Severity ({openWardIssues.length})
+            {t('ward.activeBySev', {count: openWardIssues.length})}
           </h2>
           <span className="text-[11px] text-slate-500">
-            Click Mark as Solved once resolved on-site
+            {t('ward.clickMarkSolved')}
           </span>
         </div>
 
         {openWardIssues.length === 0 ? (
           <p className="text-xs text-slate-500">
-            No active open complaints in this severity view.
+            {t('ward.noActiveSev')}
           </p>
         ) : (
           <div className="divide-y divide-[#E2E8F0]">
@@ -289,11 +289,11 @@ export const WardMapSeverityPage: React.FC = () => {
                     {issue.title}
                   </p>
                   <p className="text-xs text-slate-600">
-                    {issue.approximateArea} · Dept:{' '}
+                    {issue.approximateArea} · {t('offMap.deptLabel')}{' '}
                     <strong className="text-[#0F766E]">
-                      {issue.assignedDepartments.join(' + ')}
+                      {issue.assignedDepartments.map((d) => tDept(d)).join(' + ')}
                     </strong>{' '}
-                    · Age <span className="font-mono">{getComplaintAgeLabel(issue.createdAt)}</span>
+                    · {t('offDash.ageLabel')} <span className="font-mono">{getComplaintAgeLabel(issue.createdAt)}</span>
                   </p>
                 </div>
 
@@ -304,13 +304,13 @@ export const WardMapSeverityPage: React.FC = () => {
                     className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-[#0F9D58] px-3 text-xs font-semibold text-white hover:bg-[#0B8043] cursor-pointer"
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" />
-                    <span>Mark as Solved</span>
+                    <span>{t('ward.markSolvedQuick')}</span>
                   </button>
                   <Link
                     to={`/official/complaints/${issue.id}`}
                     className="inline-flex min-h-9 items-center gap-1 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-xs font-semibold text-[#0F766E] hover:bg-slate-100"
                   >
-                    <span>Inspect</span>
+                    <span>{t('offComp.manageBtn')}</span>
                     <ArrowUpRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>

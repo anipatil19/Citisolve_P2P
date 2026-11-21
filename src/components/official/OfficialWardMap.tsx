@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
 import L from 'leaflet';
 import {Layers} from 'lucide-react';
+import {useTranslation} from '../../i18n/useTranslation';
 import type {CivicIssue, SafetySeverity} from '../../types/civic';
 
 interface OfficialWardMapProps {
@@ -61,6 +62,7 @@ export const OfficialWardMap: React.FC<OfficialWardMapProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const groupRef = useRef<L.LayerGroup | null>(null);
+  const {t} = useTranslation();
 
   const [clusterEnabled, setClusterEnabled] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(14);
@@ -201,23 +203,23 @@ export const OfficialWardMap: React.FC<OfficialWardMapProps> = ({
         <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
           <span className="inline-flex items-center gap-1.5 font-medium">
             <span className="h-2.5 w-2.5 rounded-full bg-red-600" />
-            Critical
+            {t('map.legendCritical')}
           </span>
           <span className="inline-flex items-center gap-1.5 font-medium">
             <span className="h-2.5 w-2.5 rounded-full bg-orange-600" />
-            High
+            {t('map.legendHigh')}
           </span>
           <span className="inline-flex items-center gap-1.5 font-medium">
             <span className="h-2.5 w-2.5 rounded-full bg-amber-600" />
-            Medium
+            {t('map.legendMedium')}
           </span>
           <span className="inline-flex items-center gap-1.5 font-medium">
             <span className="h-2.5 w-2.5 rounded-full bg-[#0F766E]" />
-            Low
+            {t('map.legendLow')}
           </span>
           <span className="inline-flex items-center gap-1.5 font-medium">
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" />
-            Resolved
+            {t('map.legendResolved')}
           </span>
         </div>
 
@@ -232,7 +234,7 @@ export const OfficialWardMap: React.FC<OfficialWardMapProps> = ({
           }`}
         >
           <Layers className="h-3.5 w-3.5" />
-          <span>Cluster Markers</span>
+          <span>{t('map.clusterMarkers')}</span>
         </button>
       </div>
 
@@ -241,7 +243,7 @@ export const OfficialWardMap: React.FC<OfficialWardMapProps> = ({
       </div>
 
       <div className="border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2 text-[11px] text-slate-600">
-        Demonstration Jurisdiction Map (OpenStreetMap + Leaflet) · Official ULB ward GIS boundary polygons are not fabricated and await municipal GeoJSON integration.
+        {t('map.officialFooter')}
       </div>
     </div>
   );

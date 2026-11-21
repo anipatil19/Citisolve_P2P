@@ -18,11 +18,9 @@ import {
   SeverityLabel,
 } from '../../components/common/SeverityAndStatus';
 import {SolvedSuccessModal} from '../../components/official/SolvedSuccessModal';
-import {
-  CATEGORY_MAP,
-  ISSUE_CATEGORIES,
-} from '../../constants/civicDomain';
+import {ISSUE_CATEGORIES} from '../../constants/civicDomain';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 import type {IssueCategoryId, SafetySeverity} from '../../types/civic';
 import {getIssueDueAt, isIssueOverdue} from '../../utils/officialHelpers';
 
@@ -40,6 +38,7 @@ export const OfficialComplaintDetailPage: React.FC = () => {
     updateOfficialComplaintProgress,
     resolveOfficialComplaint,
   } = useCitiSolve();
+  const {t, tc, ts, tSev, tDept} = useTranslation();
 
   const issue = officialJurisdictionIssues.find((i) => i.id === id);
 
@@ -95,17 +94,17 @@ export const OfficialComplaintDetailPage: React.FC = () => {
     return (
       <div className="rounded-lg border border-[#E2E8F0] bg-white p-8 text-center">
         <h1 className="font-display text-lg font-bold text-[#0F172A]">
-          Complaint Unavailable in Your Jurisdiction
+          {t('offDetail.unavailableTitle')}
         </h1>
         <p className="mt-1 text-xs text-slate-600">
-          Complaint <span className="font-mono">{id}</span> was not found or lies outside your authorized municipal ward/department scope.
+          {t('offDetail.unavailableDesc', {id: id ?? ''})}
         </p>
         <Link
           to="/official/complaints"
           className="mt-4 inline-flex min-h-10 items-center gap-1.5 rounded-md bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white hover:bg-[#115E59]"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Complaint Management</span>
+          <span>{t('offDetail.backQueue')}</span>
         </Link>
       </div>
     );
@@ -145,17 +144,17 @@ export const OfficialComplaintDetailPage: React.FC = () => {
         >
           <ArrowLeft className="h-4 w-4" />
           <span>
-            {isWardOfficer ? 'Back to Ward Track' : 'Back to Complaint Management'}
+            {isWardOfficer ? t('offDetail.backWardTrack') : t('offDetail.backQueue')}
           </span>
         </Link>
 
         <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-slate-500">
           <span>ID: {issue.id}</span>
           <span>·</span>
-          <span>Submitted {new Date(issue.createdAt).toLocaleString('en-IN')}</span>
+          <span>{t('offComp.colSubmitted')}: {new Date(issue.createdAt).toLocaleString('en-IN')}</span>
           <span>·</span>
           <span className={overdue ? 'font-bold text-red-700' : ''}>
-            SLA Due: {dueDate.toLocaleString('en-IN')}
+            {t('offDetail.slaDue')} {dueDate.toLocaleString('en-IN')}
           </span>
         </div>
       </div>
@@ -177,9 +176,9 @@ export const OfficialComplaintDetailPage: React.FC = () => {
         <div className="rounded-lg border border-orange-300 bg-orange-50 p-4 text-xs text-orange-950 space-y-1">
           <p className="font-bold flex items-center gap-1.5">
             <AlertTriangle className="h-4 w-4 text-orange-700" />
-            <span>Citizen Disputed Previous Resolution — Returned for Review</span>
+            <span>{t('issue.disputedReturned')}</span>
           </p>
-          <p>Disputed by {issue.citizenDispute.disputedByAlias}: &ldquo;{issue.citizenDispute.reason}&rdquo;</p>
+          <p>{issue.citizenDispute.disputedByAlias}: &ldquo;{issue.citizenDispute.reason}&rdquo;</p>
         </div>
       )}
 
@@ -217,21 +216,21 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                   {issue.approximateArea}, {issue.hierarchy.ward}
                 </span>
                 <span>
-                  Community Upvotes:{' '}
+                  {t('offComp.colUpvotes')}:{' '}
                   <strong className="font-mono text-[#0F172A]">
                     {issue.upvotedByUserIds.length}
                   </strong>
                 </span>
                 <span>
-                  Assigned Dept:{' '}
+                  {t('offMap.deptLabel')}{' '}
                   <strong className="text-[#0F172A]">
-                    {issue.assignedDepartments.join(' + ') || 'Unassigned'}
+                    {issue.assignedDepartments.map((d) => tDept(d)).join(' + ') || t('offDetail.unassigned')}
                   </strong>
                 </span>
                 <span>
-                  Assigned Staff:{' '}
+                  {t('offDetail.assignedStaff')}{' '}
                   <strong className="text-[#0F172A]">
-                    {issue.assignedStaffName ?? 'Unassigned'}
+                    {issue.assignedStaffName ?? t('offDetail.unassigned')}
                   </strong>
                 </span>
               </div>
@@ -242,32 +241,32 @@ export const OfficialComplaintDetailPage: React.FC = () => {
           <div className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-base font-bold text-[#0F172A]">
-                AI Analysis &amp; Audit Overrides
+                {t('offDetail.aiAuditTitle')}
               </h2>
               <span className="font-mono text-xs text-slate-500">
-                Confidence: {Math.round(issue.aiAnalysis.confidence * 100)}%
+                {t('issue.confidenceLabel')} {Math.round(issue.aiAnalysis.confidence * 100)}%
               </span>
             </div>
 
             <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs space-y-1.5">
               <p>
-                <strong>AI Suggested Category:</strong>{' '}
-                {CATEGORY_MAP[issue.aiAnalysis.suggestedCategory].label} ·{' '}
-                <strong>Model/Rule:</strong> {issue.aiAnalysis.modelOrRule}
+                <strong>{t('offDetail.aiSuggestedCat')}</strong>{' '}
+                {tc(issue.aiAnalysis.suggestedCategory)} ·{' '}
+                <strong>{t('offDetail.modelRule')}</strong> {issue.aiAnalysis.modelOrRule}
               </p>
               <p className="text-slate-700">
-                <strong>AI Explanation:</strong>{' '}
+                <strong>{t('offDetail.aiExplanation')}</strong>{' '}
                 {issue.aiAnalysis.classificationExplanation}
               </p>
               <p className="text-slate-700">
-                <strong>Severity Rationale:</strong> {issue.severityReason}
+                <strong>{t('offDetail.severityRationale')}</strong> {issue.severityReason}
               </p>
             </div>
 
             {issue.aiOverrideHistory && issue.aiOverrideHistory.length > 0 && (
               <div className="space-y-2">
                 <p className="text-xs font-bold text-[#0F172A]">
-                  Recorded Official Overrides
+                  {t('offDetail.recordedOverrides')}
                 </p>
                 {issue.aiOverrideHistory.map((ovr) => (
                   <div
@@ -278,9 +277,9 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                       {ovr.field.toUpperCase()}: {ovr.previousValue} &rarr;{' '}
                       {ovr.newValue}
                     </p>
-                    <p>Reason: {ovr.reason}</p>
+                    <p>{ovr.reason}</p>
                     <p className="text-[11px] text-slate-500">
-                      By {ovr.officialName} ({ovr.employeeId}) ·{' '}
+                      {ovr.officialName} ({ovr.employeeId}) ·{' '}
                       {new Date(ovr.timestamp).toLocaleString('en-IN')}
                     </p>
                   </div>
@@ -292,11 +291,11 @@ export const OfficialComplaintDetailPage: React.FC = () => {
           {/* Potential Duplicate Complaints */}
           <div className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-2.5">
             <h2 className="font-display text-base font-bold text-[#0F172A]">
-              Potential Duplicate Complaints in Ward ({potentialDuplicates.length})
+              {t('offDetail.potentialDuplicates', {count: potentialDuplicates.length})}
             </h2>
             {potentialDuplicates.length === 0 ? (
               <p className="text-xs text-slate-500">
-                No overlapping complaints detected in this ward.
+                {t('offDetail.noDuplicates')}
               </p>
             ) : (
               <div className="space-y-2">
@@ -314,7 +313,7 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                         {dup.title}
                       </span>
                       <p className="text-[11px] text-slate-500">
-                        {dup.approximateArea} · {dup.upvotedByUserIds.length} upvotes
+                        {dup.approximateArea} · {t('status.upvotesCount', {count: dup.upvotedByUserIds.length})}
                       </p>
                     </div>
                     <ResolutionStatusLabel status={dup.status} />
@@ -327,12 +326,12 @@ export const OfficialComplaintDetailPage: React.FC = () => {
           {/* Assignment & Reassignment History */}
           <div className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-2.5">
             <h2 className="font-display text-base font-bold text-[#0F172A]">
-              Department &amp; Staff Assignment History
+              {t('offDetail.assignmentHistory')}
             </h2>
             {!issue.assignmentHistory || issue.assignmentHistory.length === 0 ? (
               <p className="text-xs text-slate-500">
-                Initial routing: {issue.assignedDepartments.join(' + ') || 'Unassigned'}
-                {issue.assignedStaffName ? ` · Staff: ${issue.assignedStaffName}` : ''}.
+                {issue.assignedDepartments.map((d) => tDept(d)).join(' + ') || t('offDetail.unassigned')}
+                {issue.assignedStaffName ? ` · ${issue.assignedStaffName}` : ''}.
               </p>
             ) : (
               <div className="space-y-2">
@@ -342,8 +341,8 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                     className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2.5 text-xs"
                   >
                     <p className="font-semibold text-[#0F172A]">
-                      {entry.departments.join(' + ')}
-                      {entry.staffName ? ` · Staff: ${entry.staffName}` : ''}
+                      {entry.departments.map((d) => tDept(d)).join(' + ')}
+                      {entry.staffName ? ` · ${entry.staffName}` : ''}
                     </p>
                     <p className="text-slate-600">{entry.note}</p>
                     <p className="mt-1 font-mono text-[11px] text-slate-400">
@@ -360,10 +359,10 @@ export const OfficialComplaintDetailPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <h2 className="font-display text-base font-bold text-[#0F172A] flex items-center gap-1.5">
                 <Lock className="h-4 w-4 text-[#0F766E]" />
-                <span>Internal Official Remarks (Private)</span>
+                <span>{t('offDetail.internalRemarksTitle')}</span>
               </h2>
               <span className="text-[11px] text-slate-500">
-                Never visible to citizens
+                {t('offDetail.hiddenFromCitizens')}
               </span>
             </div>
 
@@ -372,7 +371,7 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                 type="text"
                 value={internalRemarkText}
                 onChange={(e) => setInternalRemarkText(e.target.value)}
-                placeholder="Add confidential field inspection or engineering note..."
+                placeholder={t('offDetail.remarkPlaceholder')}
                 className="min-h-10 flex-1 rounded-md border border-[#E2E8F0] px-3 text-xs"
               />
               <button
@@ -383,17 +382,17 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                     internalRemarkText
                   );
                   if (res.ok) setInternalRemarkText('');
-                  notifyResult(res, 'Internal remark recorded.');
+                  notifyResult(res, t('offDetail.addRemarkBtn'));
                 }}
                 className="min-h-10 rounded-md bg-[#0F766E] px-3.5 text-xs font-semibold text-white hover:bg-[#115E59] cursor-pointer"
               >
-                Save Remark
+                {t('offDetail.addRemarkBtn')}
               </button>
             </div>
 
             <div className="space-y-2">
               {(issue.internalRemarks ?? []).length === 0 ? (
-                <p className="text-xs text-slate-500">No internal remarks yet.</p>
+                <p className="text-xs text-slate-500">{t('offDetail.noRemarks')}</p>
               ) : (
                 issue.internalRemarks?.map((r) => (
                   <div
@@ -414,12 +413,12 @@ export const OfficialComplaintDetailPage: React.FC = () => {
           {/* Status Timeline */}
           <div className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
             <h2 className="font-display text-base font-bold text-[#0F172A]">
-              Status Timeline &amp; Resolution Evidence
+              {t('offDetail.timelineEvidence')}
             </h2>
             {issue.resolutionEvidence && (
               <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs space-y-2">
                 <p className="font-semibold text-emerald-900">
-                  Resolution Evidence Submitted by {issue.resolutionEvidence.resolvedBy}
+                  {t('ward.resolvedBy')}: {issue.resolutionEvidence.resolvedBy}
                 </p>
                 <p className="text-emerald-800">{issue.resolutionEvidence.note}</p>
                 {issue.resolutionEvidence.photoUrl && (
@@ -440,7 +439,7 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                   <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#0F766E]" />
                   <div>
                     <p className="font-semibold text-[#0F172A]">
-                      {ev.stage.replace(/_/g, ' ').toUpperCase()}
+                      {ts(ev.stage, true)}
                     </p>
                     <p className="text-slate-600">{ev.note}</p>
                     <p className="font-mono text-[11px] text-slate-400">
@@ -458,13 +457,13 @@ export const OfficialComplaintDetailPage: React.FC = () => {
           {/* 1. Verify / Reject */}
           <div className="rounded-lg border border-[#E2E8F0] bg-white p-4 space-y-3">
             <h2 className="font-display text-sm font-bold text-[#0F172A]">
-              1. Verify or Reject Complaint
+              {t('offDetail.step1Verify')}
             </h2>
             <input
               type="text"
               value={verifyReason}
               onChange={(e) => setVerifyReason(e.target.value)}
-              placeholder="Verification note or mandatory rejection reason..."
+              placeholder={t('offDetail.reasonPlaceholder')}
               className="min-h-9 w-full rounded-md border border-[#E2E8F0] px-3 text-xs"
             />
             <div className="grid grid-cols-2 gap-2">
@@ -477,13 +476,13 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                       'verified',
                       verifyReason
                     ),
-                    'Complaint verified.'
+                    t('offDetail.verifyBtn')
                   )
                 }
                 className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md bg-[#0F766E] px-3 text-xs font-semibold text-white hover:bg-[#115E59] cursor-pointer"
               >
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Verify</span>
+                <span>{t('offDetail.verifyBtn')}</span>
               </button>
               <button
                 type="button"
@@ -494,13 +493,13 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                       'rejected',
                       verifyReason
                     ),
-                    'Complaint rejected with audit reason.'
+                    t('offDetail.rejectBtn')
                   )
                 }
                 className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 text-xs font-semibold text-red-700 hover:bg-red-100 cursor-pointer"
               >
                 <XCircle className="h-3.5 w-3.5" />
-                <span>Reject</span>
+                <span>{t('offDetail.rejectBtn')}</span>
               </button>
             </div>
           </div>
@@ -510,7 +509,7 @@ export const OfficialComplaintDetailPage: React.FC = () => {
             <div className="flex items-center gap-1.5">
               <ShieldAlert className="h-4 w-4 text-[#0F766E]" />
               <h2 className="font-display text-sm font-bold text-[#0F172A]">
-                2. Correct Category / Severity (AI Override)
+                {t('offDetail.step2Override')}
               </h2>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -524,7 +523,7 @@ export const OfficialComplaintDetailPage: React.FC = () => {
               >
                 {ISSUE_CATEGORIES.map((c) => (
                   <option key={c.id} value={c.id}>
-                    {c.shortLabel}
+                    {tc(c.id, true)}
                   </option>
                 ))}
               </select>
@@ -536,17 +535,17 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                 }
                 className="min-h-9 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-xs"
               >
-                <option value="critical">Critical</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
+                <option value="critical">{tSev('critical')}</option>
+                <option value="high">{tSev('high')}</option>
+                <option value="medium">{tSev('medium')}</option>
+                <option value="low">{tSev('low')}</option>
               </select>
             </div>
             <input
               type="text"
               value={overrideReason}
               onChange={(e) => setOverrideReason(e.target.value)}
-              placeholder="Mandatory override reason (recorded in audit log)..."
+              placeholder={t('offDetail.overrideReasonPlaceholder')}
               className="min-h-9 w-full rounded-md border border-[#E2E8F0] px-3 text-xs"
             />
             <button
@@ -558,24 +557,24 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                   reason: overrideReason,
                 });
                 if (res.ok) setOverrideReason('');
-                notifyResult(res, 'AI override recorded in audit trail.');
+                notifyResult(res, t('offDetail.saveOverrideBtn'));
               }}
               className="min-h-9 w-full rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-xs font-semibold text-[#0F172A] hover:bg-slate-100 cursor-pointer"
             >
-              Save Official Override
+              {t('offDetail.saveOverrideBtn')}
             </button>
           </div>
 
           {/* 3. Auto-Assigned Department & Target Resolution Date */}
           <div className="rounded-lg border border-[#E2E8F0] bg-white p-4 space-y-3">
             <h2 className="font-display text-sm font-bold text-[#0F172A]">
-              3. Auto-Assigned Department &amp; Target Date
+              {t('offDetail.step3DeptDate')}
             </h2>
 
             <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-3 text-xs space-y-1">
-              <p className="text-slate-500">Auto-Routed Municipal Department(s)</p>
+              <p className="text-slate-500">{t('offDetail.autoRoutedDept')}</p>
               <p className="font-bold text-[#0F766E]">
-                {issue.assignedDepartments.join(' + ')}
+                {issue.assignedDepartments.map((d) => tDept(d)).join(' + ')}
               </p>
             </div>
 
@@ -583,7 +582,7 @@ export const OfficialComplaintDetailPage: React.FC = () => {
               <Calendar className="h-4 w-4 text-slate-500 shrink-0" />
               <input
                 type="date"
-                aria-label="Target resolution date"
+                aria-label={t('offDetail.targetDateLabel')}
                 value={targetDate}
                 onChange={(e) => setTargetDate(e.target.value)}
                 className="min-h-9 flex-1 rounded-md border border-[#E2E8F0] px-2.5 text-xs"
@@ -593,12 +592,12 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                 onClick={() =>
                   notifyResult(
                     setOfficialTargetDate(issue.id, targetDate),
-                    'Target resolution date updated.'
+                    t('offDetail.setTargetDateBtn')
                   )
                 }
                 className="min-h-9 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-xs font-semibold text-[#0F172A] hover:bg-slate-100 cursor-pointer"
               >
-                Set Date
+                {t('offDetail.setTargetDateBtn')}
               </button>
             </div>
           </div>
@@ -606,14 +605,14 @@ export const OfficialComplaintDetailPage: React.FC = () => {
           {/* 4. Update Progress & Resolution Evidence */}
           <div className="rounded-lg border border-[#E2E8F0] bg-white p-4 space-y-3">
             <h2 className="font-display text-sm font-bold text-[#0F172A]">
-              4. Progress &amp; Resolution Workflow
+              {t('offDetail.step4Workflow')}
             </h2>
 
             <input
               type="text"
               value={progressNote}
               onChange={(e) => setProgressNote(e.target.value)}
-              placeholder="Public field update note..."
+              placeholder={t('offDetail.progressNotePlaceholder')}
               className="min-h-9 w-full rounded-md border border-[#E2E8F0] px-3 text-xs"
             />
             <div className="grid grid-cols-2 gap-2">
@@ -626,11 +625,11 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                     progressNote
                   );
                   if (res.ok) setProgressNote('');
-                  notifyResult(res, 'Marked Received by Department.');
+                  notifyResult(res, t('offDetail.markReceivedBtn'));
                 }}
                 className="min-h-9 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 text-xs font-semibold text-[#0F172A] hover:bg-slate-100 cursor-pointer"
               >
-                Mark Dept Received
+                {t('offDetail.markReceivedBtn')}
               </button>
               <button
                 type="button"
@@ -641,23 +640,23 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                     progressNote
                   );
                   if (res.ok) setProgressNote('');
-                  notifyResult(res, 'Status moved to Under Process.');
+                  notifyResult(res, t('offDetail.markUnderProcessBtn'));
                 }}
                 className="min-h-9 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 text-xs font-semibold text-[#0F172A] hover:bg-slate-100 cursor-pointer"
               >
-                Mark Under Process
+                {t('offDetail.markUnderProcessBtn')}
               </button>
             </div>
 
             <div className="border-t border-[#E2E8F0] pt-3 space-y-2.5">
               <p className="text-xs font-semibold text-[#0F172A]">
-                Complete Work (Moves to Awaiting Citizen Confirmation)
+                {t('offDetail.resolveSectionTitle')}
               </p>
               <textarea
                 rows={2}
                 value={resolutionNote}
                 onChange={(e) => setResolutionNote(e.target.value)}
-                placeholder="Mandatory resolution summary (e.g., Replaced damaged junction box cover and insulated cables)..."
+                placeholder={t('offDetail.resolutionNotePlaceholder')}
                 className="w-full rounded-md border border-[#E2E8F0] p-2.5 text-xs"
               />
 
@@ -665,8 +664,8 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                 <Upload className="h-4 w-4 text-[#0F766E]" />
                 <span>
                   {evidencePhotoUrl
-                    ? 'After-work evidence attached'
-                    : 'Upload after-work resolution photo (Optional)'}
+                    ? t('offDetail.photoAttached')
+                    : t('offDetail.uploadPhotoOptional')}
                 </span>
                 <input
                   type="file"
@@ -690,14 +689,11 @@ export const OfficialComplaintDetailPage: React.FC = () => {
                       setSolvedModalOpen(true);
                     }
                   }
-                  notifyResult(
-                    res,
-                    'Marked Solved — Now visible on Citizen and Municipal Officer dashboards.'
-                  );
+                  notifyResult(res, t('solvedModal.subtitle'));
                 }}
                 className="min-h-10 w-full rounded-md bg-[#0F9D58] px-4 py-2 text-xs font-semibold text-white hover:bg-[#0B8043] cursor-pointer"
               >
-                Mark as Solved
+                {t('offDetail.markSolvedBtn')}
               </button>
             </div>
           </div>

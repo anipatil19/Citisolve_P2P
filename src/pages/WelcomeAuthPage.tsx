@@ -9,9 +9,11 @@ import {
   ShieldCheck,
   UserCheck,
 } from 'lucide-react';
+import {LanguageSelector} from '../components/common/LanguageSelector';
 import {DEMO_LOCALITIES, SUPPORTED_LANGUAGES} from '../constants/civicDomain';
 import {useCitiSolve} from '../context/CitiSolveContext';
 import {DEMO_OFFICIAL_ACCOUNTS} from '../data/officialDemoData';
+import {useTranslation} from '../i18n/useTranslation';
 import type {
   AgeEligibilityOption,
   LocationPermissionStatus,
@@ -21,6 +23,8 @@ import type {
 
 export const WelcomeAuthPage: React.FC = () => {
   const {
+    appLanguage,
+    setAppLanguage,
     currentUser,
     currentOfficial,
     loginAsDemoCitizen,
@@ -28,6 +32,7 @@ export const WelcomeAuthPage: React.FC = () => {
     loginWithOfficialCredentials,
     registerCitizen,
   } = useCitiSolve();
+  const {t} = useTranslation();
   const navigate = useNavigate();
 
   const [selectedRole, setSelectedRole] = useState<UserRole>('citizen');
@@ -51,8 +56,6 @@ export const WelcomeAuthPage: React.FC = () => {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [preferredLanguage, setPreferredLanguage] =
-    useState<SupportedLanguageCode>('en');
   const [ageEligibility, setAgeEligibility] =
     useState<AgeEligibilityOption>('adult_18_plus');
   const [guardianName, setGuardianName] = useState('');
@@ -154,7 +157,7 @@ export const WelcomeAuthPage: React.FC = () => {
     setErrorMsg(null);
     setSuccessMsg(null);
     if (loginPassword.trim().length < 4) {
-      setErrorMsg('Please enter your password (minimum 4 characters).');
+      setErrorMsg(t('auth.errPasswordLength'));
       return;
     }
     setSubmitting(true);
@@ -204,19 +207,17 @@ export const WelcomeAuthPage: React.FC = () => {
     setErrorMsg(null);
 
     if (fullName.trim().length < 2) {
-      setErrorMsg('Please enter your full name.');
+      setErrorMsg(t('auth.errNameRequired'));
       return;
     }
     const cleanPhone = phone.replace(/\s+/g, '');
     if (cleanPhone.length < 10) {
-      setErrorMsg('Please enter a valid 10-digit Indian mobile number.');
+      setErrorMsg(t('auth.errPhoneRequired'));
       return;
     }
     if (ageEligibility === 'minor_with_guardian') {
       if (guardianName.trim().length < 2 || !guardianConsentConfirmed) {
-        setErrorMsg(
-          'For citizens under 18, provide a parent/guardian name and confirm consent.'
-        );
+        setErrorMsg(t('auth.errGuardianRequired'));
         return;
       }
     }
@@ -235,7 +236,7 @@ export const WelcomeAuthPage: React.FC = () => {
         name: fullName,
         phone,
         email,
-        preferredLanguage,
+        preferredLanguage: appLanguage,
         ageEligibility,
         guardianName:
           ageEligibility === 'minor_with_guardian' ? guardianName : undefined,
@@ -258,6 +259,11 @@ export const WelcomeAuthPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col justify-center px-4 py-6 sm:px-6">
       <div className="mx-auto w-full max-w-md rounded-lg border border-[#E2E8F0] bg-white p-6 shadow-xs sm:p-7">
+        {/* Top Row: Language Switcher */}
+        <div className="flex justify-end mb-2">
+          <LanguageSelector />
+        </div>
+
         {/* Compact Wordmark & Heading */}
         <div className="text-center">
           <div className="inline-flex items-center gap-2">
@@ -265,20 +271,20 @@ export const WelcomeAuthPage: React.FC = () => {
               C
             </span>
             <span className="font-display text-base font-bold tracking-tight text-[#0F172A]">
-              CitiSOLVE
+              {t('brand.name')}
             </span>
           </div>
           <h1 className="mt-3 font-display text-xl font-bold text-[#0F172A]">
-            Welcome to CitiSOLVE
+            {t('auth.welcomeHeading')}
           </h1>
-          <p className="mt-1 text-xs text-slate-600">Sign in to continue</p>
+          <p className="mt-1 text-xs text-slate-600">{t('auth.signInSubtitle')}</p>
         </div>
 
         {/* Active session shortcut if user navigated back to / */}
         {(currentUser || currentOfficial) && (
           <div className="mt-4 flex items-center justify-between gap-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs">
             <span className="truncate text-slate-700">
-              Active:{' '}
+              {t('common.active')}:{' '}
               <strong className="text-[#0F172A]">
                 {currentOfficial ? currentOfficial.name : currentUser?.name}
               </strong>
@@ -288,7 +294,7 @@ export const WelcomeAuthPage: React.FC = () => {
               onClick={() => navigate(currentOfficial ? '/official' : '/home')}
               className="shrink-0 font-semibold text-[#0F766E] hover:underline cursor-pointer"
             >
-              Open Dashboard
+              {t('offNav.dashboard')}
             </button>
           </div>
         )}
@@ -311,7 +317,7 @@ export const WelcomeAuthPage: React.FC = () => {
             }`}
           >
             <UserCheck className="h-4 w-4 shrink-0" />
-            <span>Citizen</span>
+            <span>{t('auth.citizenRole')}</span>
           </button>
 
           <button
@@ -326,7 +332,7 @@ export const WelcomeAuthPage: React.FC = () => {
             }`}
           >
             <Building2 className="h-4 w-4 shrink-0" />
-            <span>Government Official</span>
+            <span>{t('auth.officialRole')}</span>
           </button>
         </div>
 
@@ -359,14 +365,14 @@ export const WelcomeAuthPage: React.FC = () => {
                     htmlFor="citizen-identifier"
                     className="block text-xs font-semibold text-[#0F172A]"
                   >
-                    Phone number or email
+                    {t('auth.phoneOrEmail')}
                   </label>
                   <input
                     id="citizen-identifier"
                     type="text"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    placeholder="+91 98450 21490 or email"
+                    placeholder={t('auth.phoneOrEmailPlaceholder')}
                     required
                     className="mt-1 block min-h-10 w-full rounded-md border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A]"
                   />
@@ -378,7 +384,7 @@ export const WelcomeAuthPage: React.FC = () => {
                       htmlFor="citizen-password"
                       className="block text-xs font-semibold text-[#0F172A]"
                     >
-                      Password
+                      {t('auth.password')}
                     </label>
                     <button
                       type="button"
@@ -388,7 +394,7 @@ export const WelcomeAuthPage: React.FC = () => {
                       }}
                       className="text-xs font-medium text-[#0F766E] hover:underline cursor-pointer"
                     >
-                      Forgot password?
+                      {t('auth.forgotPassword')}
                     </button>
                   </div>
                   <input
@@ -396,6 +402,7 @@ export const WelcomeAuthPage: React.FC = () => {
                     type="password"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder={t('auth.passwordPlaceholder')}
                     required
                     className="mt-1 block min-h-10 w-full rounded-md border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A]"
                   />
@@ -407,7 +414,7 @@ export const WelcomeAuthPage: React.FC = () => {
                   className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#115E59] disabled:opacity-60 cursor-pointer"
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                  <span>Login as Citizen</span>
+                  <span>{t('auth.loginBtn')}</span>
                 </button>
 
                 <button
@@ -416,11 +423,11 @@ export const WelcomeAuthPage: React.FC = () => {
                   disabled={submitting}
                   className="flex min-h-10 w-full items-center justify-center rounded-md border border-[#E2E8F0] bg-white px-4 py-2 text-xs font-semibold text-[#0F172A] hover:bg-slate-50 cursor-pointer"
                 >
-                  Continue with Google (Demo)
+                  {t('auth.continueGoogle')}
                 </button>
 
                 <div className="border-t border-[#E2E8F0] pt-3 flex items-center justify-between text-xs text-slate-600">
-                  <span>New citizen user?</span>
+                  <span>{t('auth.noAccount')}</span>
                   <button
                     type="button"
                     onClick={() => {
@@ -429,12 +436,12 @@ export const WelcomeAuthPage: React.FC = () => {
                     }}
                     className="font-semibold text-[#0F766E] hover:underline cursor-pointer"
                   >
-                    Create account
+                    {t('auth.createAccount')}
                   </button>
                 </div>
 
                 <p className="text-[11px] text-center text-slate-500">
-                  Demonstration citizen login — no external credential server connected.
+                  {t('auth.demoNotice')}
                 </p>
               </form>
             )}
@@ -442,31 +449,27 @@ export const WelcomeAuthPage: React.FC = () => {
             {citizenView === 'forgot' && (
               <div className="mt-4 space-y-3">
                 <p className="text-xs font-semibold text-[#0F172A]">
-                  Reset Citizen Password (Demonstration)
+                  {t('auth.forgotPassword')}
                 </p>
                 <p className="text-xs text-slate-600">
-                  Enter your phone number or email to simulate a password reset link.
+                  {t('auth.forgotHelpCitizen')}
                 </p>
                 <input
                   type="text"
                   value={forgotInput}
                   onChange={(e) => setForgotInput(e.target.value)}
-                  placeholder="Phone or email"
+                  placeholder={t('auth.phoneOrEmail')}
                   className="block min-h-10 w-full rounded-md border border-[#E2E8F0] px-3 py-2 text-sm"
                 />
                 <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={() => {
-                      setSuccessMsg(
-                        forgotInput.trim()
-                          ? `Demo reset notice generated for ${forgotInput.trim()}.`
-                          : 'Enter your phone or email first.'
-                      );
+                      setSuccessMsg(t('auth.forgotHelpCitizen'));
                     }}
                     className="min-h-10 flex-1 rounded-md bg-[#0F766E] px-3 py-2 text-xs font-semibold text-white hover:bg-[#115E59] cursor-pointer"
                   >
-                    Send Reset Notice
+                    {t('common.submit')}
                   </button>
                   <button
                     type="button"
@@ -476,7 +479,7 @@ export const WelcomeAuthPage: React.FC = () => {
                     }}
                     className="min-h-10 rounded-md border border-[#E2E8F0] px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
                   >
-                    Back to login
+                    {t('auth.backToLogin')}
                   </button>
                 </div>
               </div>
@@ -486,7 +489,7 @@ export const WelcomeAuthPage: React.FC = () => {
               <form onSubmit={handleRegisterSubmit} className="mt-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-bold text-[#0F172A]">
-                    Create Citizen Account (Demo)
+                    {t('auth.createCitizenTitle')}
                   </p>
                   <button
                     type="button"
@@ -496,7 +499,7 @@ export const WelcomeAuthPage: React.FC = () => {
                     }}
                     className="text-xs font-semibold text-[#0F766E] hover:underline cursor-pointer"
                   >
-                    Back to login
+                    {t('auth.backToLogin')}
                   </button>
                 </div>
 
@@ -505,14 +508,14 @@ export const WelcomeAuthPage: React.FC = () => {
                     htmlFor="reg-name"
                     className="block text-xs font-semibold text-[#0F172A]"
                   >
-                    Full Name
+                    {t('auth.fullName')}
                   </label>
                   <input
                     id="reg-name"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Full name"
+                    placeholder={t('auth.fullName')}
                     required
                     className="mt-1 block min-h-10 w-full rounded-md border border-[#E2E8F0] px-3 py-1.5 text-sm"
                   />
@@ -524,7 +527,7 @@ export const WelcomeAuthPage: React.FC = () => {
                       htmlFor="reg-phone"
                       className="block text-xs font-semibold text-[#0F172A]"
                     >
-                      Phone Number
+                      {t('auth.phoneNumber')}
                     </label>
                     <input
                       id="reg-phone"
@@ -541,19 +544,19 @@ export const WelcomeAuthPage: React.FC = () => {
                       htmlFor="reg-lang"
                       className="block text-xs font-semibold text-[#0F172A]"
                     >
-                      Language
+                      {t('auth.preferredLanguage')}
                     </label>
                     <select
                       id="reg-lang"
-                      value={preferredLanguage}
+                      value={appLanguage}
                       onChange={(e) =>
-                        setPreferredLanguage(e.target.value as SupportedLanguageCode)
+                        setAppLanguage(e.target.value as SupportedLanguageCode)
                       }
                       className="mt-1 block min-h-10 w-full rounded-md border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs"
                     >
                       {SUPPORTED_LANGUAGES.map((lang) => (
                         <option key={lang.code} value={lang.code}>
-                          {lang.name}
+                          {lang.nativeLabel} ({lang.name})
                         </option>
                       ))}
                     </select>
@@ -565,7 +568,7 @@ export const WelcomeAuthPage: React.FC = () => {
                     htmlFor="reg-email"
                     className="block text-xs font-semibold text-[#0F172A]"
                   >
-                    Email (Optional)
+                    {t('auth.emailOptional')}
                   </label>
                   <input
                     id="reg-email"
@@ -580,7 +583,7 @@ export const WelcomeAuthPage: React.FC = () => {
                 <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2.5 space-y-1.5 text-xs">
                   <div className="flex items-center gap-1.5 font-semibold text-[#0F172A]">
                     <ShieldCheck className="h-3.5 w-3.5 text-[#0F766E]" />
-                    <span>Age &amp; Guardian Consent</span>
+                    <span>{t('auth.ageEligibility')}</span>
                   </div>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -589,7 +592,7 @@ export const WelcomeAuthPage: React.FC = () => {
                       checked={ageEligibility === 'adult_18_plus'}
                       onChange={() => setAgeEligibility('adult_18_plus')}
                     />
-                    <span>18 years or older</span>
+                    <span>{t('auth.age18Plus')}</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -598,7 +601,7 @@ export const WelcomeAuthPage: React.FC = () => {
                       checked={ageEligibility === 'minor_with_guardian'}
                       onChange={() => setAgeEligibility('minor_with_guardian')}
                     />
-                    <span>Under 18 (guardian consent required)</span>
+                    <span>{t('auth.ageUnder18')}</span>
                   </label>
 
                   {ageEligibility === 'minor_with_guardian' && (
@@ -607,7 +610,7 @@ export const WelcomeAuthPage: React.FC = () => {
                         type="text"
                         value={guardianName}
                         onChange={(e) => setGuardianName(e.target.value)}
-                        placeholder="Parent / Guardian Name"
+                        placeholder={t('auth.guardianName')}
                         className="block min-h-9 w-full rounded-md border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs"
                       />
                       <label className="flex items-start gap-2 cursor-pointer">
@@ -619,7 +622,7 @@ export const WelcomeAuthPage: React.FC = () => {
                           }
                           className="mt-0.5"
                         />
-                        <span>Guardian consents to supervised reporting.</span>
+                        <span>{t('auth.guardianConsent')}</span>
                       </label>
                     </div>
                   )}
@@ -628,7 +631,7 @@ export const WelcomeAuthPage: React.FC = () => {
                 <div className="rounded-md border border-[#E2E8F0] p-2.5 space-y-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-[#0F172A]">
-                      Ward &amp; Permissions
+                      {t('auth.wardLocality')}
                     </span>
                     <div className="flex gap-1.5">
                       <button
@@ -638,7 +641,13 @@ export const WelcomeAuthPage: React.FC = () => {
                         className="inline-flex items-center gap-1 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-1 text-[11px] font-medium text-[#0F766E] hover:bg-teal-50 cursor-pointer"
                       >
                         <MapPin className="h-3 w-3" />
-                        <span>{locating ? 'Locating...' : 'GPS'}</span>
+                        <span>
+                          {locating
+                            ? t('common.loading')
+                            : locationPermission === 'granted'
+                              ? t('auth.gpsEnabled')
+                              : t('auth.allowGps')}
+                        </span>
                       </button>
                       <button
                         type="button"
@@ -646,12 +655,16 @@ export const WelcomeAuthPage: React.FC = () => {
                         className="inline-flex items-center gap-1 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100 cursor-pointer"
                       >
                         <Camera className="h-3 w-3" />
-                        <span>{cameraGranted ? 'Cam Ready' : 'Camera'}</span>
+                        <span>
+                          {cameraGranted
+                            ? t('auth.cameraEnabled')
+                            : t('auth.allowCamera')}
+                        </span>
                       </button>
                     </div>
                   </div>
                   <select
-                    aria-label="Demonstration Ward"
+                    aria-label={t('auth.wardLocality')}
                     value={selectedLocalityIdx}
                     onChange={(e) => setSelectedLocalityIdx(Number(e.target.value))}
                     className="block min-h-9 w-full rounded-md border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs"
@@ -671,7 +684,7 @@ export const WelcomeAuthPage: React.FC = () => {
                   className="flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-[#0F766E] px-4 py-2 text-sm font-semibold text-white hover:bg-[#115E59] disabled:opacity-60 cursor-pointer"
                 >
                   {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                  <span>Create Citizen Account</span>
+                  <span>{t('auth.createAccountSubmit')}</span>
                 </button>
               </form>
             )}
@@ -683,7 +696,7 @@ export const WelcomeAuthPage: React.FC = () => {
           <form onSubmit={handleOfficialLoginSubmit} className="mt-4 space-y-3.5">
             <div>
               <p className="text-xs font-semibold text-[#0F172A] mb-1.5">
-                Select Official Account Type
+                {t('auth.selectOfficerAccount')}
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -699,7 +712,7 @@ export const WelcomeAuthPage: React.FC = () => {
                       : 'border-[#E2E8F0] bg-white text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  Municipal Officer
+                  {t('common.municipalOfficer')}
                 </button>
                 <button
                   type="button"
@@ -714,9 +727,14 @@ export const WelcomeAuthPage: React.FC = () => {
                       : 'border-[#E2E8F0] bg-white text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  Ward Officer
+                  {t('common.wardOfficer')}
                 </button>
               </div>
+              <p className="mt-1.5 text-[11px] text-slate-500">
+                {officialLoginRole === 'ward_officer'
+                  ? t('auth.wardOfficerDesc')
+                  : t('auth.municipalOfficerDesc')}
+              </p>
             </div>
 
             <div>
@@ -724,18 +742,14 @@ export const WelcomeAuthPage: React.FC = () => {
                 htmlFor="official-identifier"
                 className="block text-xs font-semibold text-[#0F172A]"
               >
-                Official email or employee ID
+                {t('auth.officialEmailOrId')}
               </label>
               <input
                 id="official-identifier"
                 type="text"
                 value={officialIdentifier}
                 onChange={(e) => setOfficialIdentifier(e.target.value)}
-                placeholder={
-                  officialLoginRole === 'ward_officer'
-                    ? 'BBMP-W80-01 or ward.officer@bbmp.gov.in'
-                    : 'BBMP-MUN-01 or municipal.officer@bbmp.gov.in'
-                }
+                placeholder={t('auth.officialIdPlaceholder')}
                 required
                 className="mt-1 block min-h-10 w-full rounded-md border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A]"
               />
@@ -747,14 +761,14 @@ export const WelcomeAuthPage: React.FC = () => {
                   htmlFor="official-password"
                   className="block text-xs font-semibold text-[#0F172A]"
                 >
-                  Password
+                  {t('auth.password')}
                 </label>
                 <button
                   type="button"
                   onClick={() => setOfficialForgotOpen((prev) => !prev)}
                   className="text-xs font-medium text-[#0F766E] hover:underline cursor-pointer"
                 >
-                  Forgot password?
+                  {t('auth.forgotPassword')}
                 </button>
               </div>
               <input
@@ -762,6 +776,7 @@ export const WelcomeAuthPage: React.FC = () => {
                 type="password"
                 value={officialPassword}
                 onChange={(e) => setOfficialPassword(e.target.value)}
+                placeholder={t('auth.passwordPlaceholder')}
                 required
                 className="mt-1 block min-h-10 w-full rounded-md border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#0F172A]"
               />
@@ -769,7 +784,7 @@ export const WelcomeAuthPage: React.FC = () => {
 
             {officialForgotOpen && (
               <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2.5 text-xs text-slate-600">
-                Demo Portal Notice: In production, municipal official password resets are managed by your ULB IT Administrator / SSO directory.
+                {t('auth.enterOfficialIdPass')}
               </div>
             )}
 
@@ -780,15 +795,18 @@ export const WelcomeAuthPage: React.FC = () => {
             >
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               <span>
-                {officialLoginRole === 'ward_officer'
-                  ? 'Sign in as Ward Officer'
-                  : 'Sign in as Municipal Officer'}
+                {t('auth.loginAsOfficer', {
+                  role:
+                    officialLoginRole === 'ward_officer'
+                      ? t('common.wardOfficer')
+                      : t('common.municipalOfficer'),
+                })}
               </span>
             </button>
 
             <p className="text-[11px] text-center text-slate-500">
-              Demo credentials: <span className="font-mono">BBMP-MUN-01</span> (Municipal Officer) ·{' '}
-              <span className="font-mono">BBMP-W80-01</span> (Ward Officer)
+              {t('auth.demoNotice')} (<span className="font-mono">BBMP-MUN-01</span> ·{' '}
+              <span className="font-mono">BBMP-W80-01</span>)
             </p>
           </form>
         )}

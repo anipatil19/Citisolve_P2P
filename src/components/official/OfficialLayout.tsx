@@ -16,23 +16,8 @@ import {
   X,
 } from 'lucide-react';
 import {useCitiSolve} from '../../context/CitiSolveContext';
-
-const MUNICIPAL_NAV_ITEMS = [
-  {to: '/official', label: 'Dashboard', icon: LayoutDashboard, end: true},
-  {to: '/official/complaints', label: 'Complaint Management', icon: ClipboardList, end: false},
-  {to: '/official/map', label: 'Ward Map', icon: MapIcon, end: false},
-  {to: '/official/departments', label: 'Departments & Track', icon: Users, end: false},
-  {to: '/official/escalations', label: 'Escalations', icon: AlertTriangle, end: false},
-  {to: '/official/analytics', label: 'Reports & Analytics', icon: BarChart3, end: false},
-  {to: '/official/notifications', label: 'Notifications', icon: Bell, end: false},
-  {to: '/official/profile', label: 'Official Profile & Settings', icon: UserCog, end: false},
-];
-
-const WARD_OFFICER_NAV_ITEMS = [
-  {to: '/official', label: '1. Map View & Severity', icon: MapIcon, end: true},
-  {to: '/official/ward-track', label: '2. Dept & Report Track', icon: ClipboardList, end: false},
-  {to: '/official/ward-solved', label: '3. Solved Complaints', icon: CheckCircle2, end: false},
-];
+import {useTranslation} from '../../i18n/useTranslation';
+import {LanguageSelector} from '../common/LanguageSelector';
 
 export const OfficialLayout: React.FC<{children: React.ReactNode}> = ({
   children,
@@ -44,6 +29,7 @@ export const OfficialLayout: React.FC<{children: React.ReactNode}> = ({
     markOfficialNotificationRead,
     logoutOfficial,
   } = useCitiSolve();
+  const {t, tRole} = useTranslation();
   const navigate = useNavigate();
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -53,7 +39,22 @@ export const OfficialLayout: React.FC<{children: React.ReactNode}> = ({
   if (!currentOfficial) return null;
 
   const isWardOfficer = currentOfficial.roleLevel === 'ward_officer';
-  const navItems = isWardOfficer ? WARD_OFFICER_NAV_ITEMS : MUNICIPAL_NAV_ITEMS;
+  const municipalNavItems = [
+    {to: '/official', label: t('offNav.dashboard'), icon: LayoutDashboard, end: true},
+    {to: '/official/complaints', label: t('offNav.complaints'), icon: ClipboardList, end: false},
+    {to: '/official/map', label: t('offNav.wardMap'), icon: MapIcon, end: false},
+    {to: '/official/departments', label: t('offNav.departments'), icon: Users, end: false},
+    {to: '/official/escalations', label: t('offNav.escalations'), icon: AlertTriangle, end: false},
+    {to: '/official/analytics', label: t('offNav.analytics'), icon: BarChart3, end: false},
+    {to: '/official/notifications', label: t('offNav.notifications'), icon: Bell, end: false},
+    {to: '/official/profile', label: t('offNav.profile'), icon: UserCog, end: false},
+  ];
+  const wardOfficerNavItems = [
+    {to: '/official', label: t('offNav.wardMapSeverity'), icon: MapIcon, end: true},
+    {to: '/official/ward-track', label: t('offNav.wardDeptTrack'), icon: ClipboardList, end: false},
+    {to: '/official/ward-solved', label: t('offNav.wardSolved'), icon: CheckCircle2, end: false},
+  ];
+  const navItems = isWardOfficer ? wardOfficerNavItems : municipalNavItems;
 
   const handleLogout = () => {
     logoutOfficial();
@@ -76,10 +77,10 @@ export const OfficialLayout: React.FC<{children: React.ReactNode}> = ({
               </span>
               <div className="min-w-0">
                 <p className="font-display text-sm font-bold tracking-tight text-[#0F172A] truncate">
-                  CitiSOLVE
+                  {t('brand.name')}
                 </p>
                 <p className="text-[10px] font-medium text-[#0F766E] truncate">
-                  Official Portal
+                  {isWardOfficer ? t('offNav.wardPortalTitle') : t('offNav.portalTitle')}
                 </p>
               </div>
             </Link>
@@ -136,7 +137,7 @@ export const OfficialLayout: React.FC<{children: React.ReactNode}> = ({
             </p>
             <p className="truncate">{currentOfficial.department}</p>
             <p className="truncate text-slate-500">
-              Demo Mode · Role-Scoped Access
+              {t('common.demoPlatform')} · {tRole(currentOfficial.roleLevel)}
             </p>
           </div>
         )}
@@ -152,7 +153,7 @@ export const OfficialLayout: React.FC<{children: React.ReactNode}> = ({
           <aside className="relative z-10 flex w-68 flex-col bg-white border-r border-[#E2E8F0]">
             <div className="flex h-14 items-center justify-between border-b border-[#E2E8F0] px-4">
               <span className="font-display text-sm font-bold text-[#0F172A]">
-                CitiSOLVE Official
+                {t('brand.name')} · {isWardOfficer ? t('offNav.wardPortalTitle') : t('offNav.portalTitle')}
               </span>
               <button
                 type="button"
@@ -219,16 +220,17 @@ export const OfficialLayout: React.FC<{children: React.ReactNode}> = ({
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 truncate">
-                {currentOfficial.designation} · ID: {currentOfficial.employeeId} (Demo Auth)
+                {tRole(currentOfficial.roleLevel)} · {currentOfficial.employeeId} ({t('common.demoPlatform')})
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <LanguageSelector compact />
             <div className="relative">
               <button
                 type="button"
-                aria-label={`Official notifications (${unreadOfficialNotificationsCount} unread)`}
+                aria-label={`${t('offNav.notifications')} (${unreadOfficialNotificationsCount})`}
                 onClick={() => setNotifOpen((o) => !o)}
                 className="relative flex h-9 w-9 items-center justify-center rounded-md border border-[#E2E8F0] bg-white text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
@@ -244,14 +246,14 @@ export const OfficialLayout: React.FC<{children: React.ReactNode}> = ({
                 <div className="absolute right-0 mt-2 w-80 rounded-lg border border-[#E2E8F0] bg-white p-3 shadow-lg z-40">
                   <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-2">
                     <span className="text-xs font-bold text-[#0F172A]">
-                      Jurisdiction Alerts
+                      {t('offNav.notifications')}
                     </span>
                     <Link
                       to="/official/notifications"
                       onClick={() => setNotifOpen(false)}
                       className="text-xs font-semibold text-[#0F766E] hover:underline"
                     >
-                      View all
+                      {t('common.viewAll')}
                     </Link>
                   </div>
                   <div className="mt-2 max-h-64 space-y-2 overflow-y-auto">
@@ -304,7 +306,7 @@ export const OfficialLayout: React.FC<{children: React.ReactNode}> = ({
               className="inline-flex h-9 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-xs font-semibold text-slate-700 hover:bg-red-50 hover:text-red-700 cursor-pointer"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Sign Out</span>
+              <span className="hidden sm:inline">{t('common.signOut')}</span>
             </button>
           </div>
         </header>

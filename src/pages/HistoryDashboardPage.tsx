@@ -5,22 +5,23 @@ import {
   ResolutionStatusLabel,
   SeverityLabel,
 } from '../components/common/SeverityAndStatus';
-import {CATEGORY_MAP} from '../constants/civicDomain';
 import {useCitiSolve} from '../context/CitiSolveContext';
 import {COMMUNITY_HISTORY_DATA} from '../data/demoData';
+import {useTranslation} from '../i18n/useTranslation';
 import type {GeographyLevel} from '../types/civic';
 
-const LEVELS: Array<{id: GeographyLevel; label: string}> = [
-  {id: 'locality', label: 'Locality'},
-  {id: 'ward', label: 'Ward'},
-  {id: 'municipality', label: 'Municipality'},
-  {id: 'district', label: 'District'},
-  {id: 'state', label: 'State'},
-  {id: 'country', label: 'Country'},
+const LEVEL_IDS: GeographyLevel[] = [
+  'locality',
+  'ward',
+  'municipality',
+  'district',
+  'state',
+  'country',
 ];
 
 export const HistoryDashboardPage: React.FC = () => {
   const {currentUser, issues, totalAwardedPoints} = useCitiSolve();
+  const {t, tc} = useTranslation();
   const [activeSection, setActiveSection] = useState<'personal' | 'community'>(
     'personal'
   );
@@ -52,10 +53,10 @@ export const HistoryDashboardPage: React.FC = () => {
       <div className="flex flex-col gap-4 rounded-lg border border-slate-200 bg-white p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-slate-900">
-            Personal &amp; Community Civic History
+            {t('history.title')}
           </h1>
           <p className="mt-1 text-sm text-slate-600">
-            Track your personal civic footprint and explore aggregated improvement trends from locality up to national level without exposing private details.
+            {t('history.subtitle')}
           </p>
         </div>
 
@@ -76,7 +77,7 @@ export const HistoryDashboardPage: React.FC = () => {
             }`}
           >
             <UserCheck className="h-3.5 w-3.5" />
-            <span>Personal History</span>
+            <span>{t('history.personalTab')}</span>
           </button>
           <button
             type="button"
@@ -90,7 +91,7 @@ export const HistoryDashboardPage: React.FC = () => {
             }`}
           >
             <Globe2 className="h-3.5 w-3.5" />
-            <span>Community Hierarchy</span>
+            <span>{t('history.communityTab')}</span>
           </button>
         </div>
       </div>
@@ -99,27 +100,27 @@ export const HistoryDashboardPage: React.FC = () => {
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs font-medium text-slate-500">Issues Reported</p>
+              <p className="text-xs font-medium text-slate-500">{t('history.issuesReported')}</p>
               <p className="mt-1 font-mono text-2xl font-bold text-slate-900 tabular-nums">
                 {reportedByMe.length}
               </p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs font-medium text-slate-500">Issues Supported</p>
+              <p className="text-xs font-medium text-slate-500">{t('history.issuesSupported')}</p>
               <p className="mt-1 font-mono text-2xl font-bold text-indigo-600 tabular-nums">
                 {supportedByMe.length}
               </p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs font-medium text-slate-500">Resolved Reports</p>
+              <p className="text-xs font-medium text-slate-500">{t('history.resolvedReports')}</p>
               <p className="mt-1 font-mono text-2xl font-bold text-emerald-700 tabular-nums">
                 {resolvedByMe.length}
               </p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-white p-4">
-              <p className="text-xs font-medium text-slate-500">Points Earned</p>
+              <p className="text-xs font-medium text-slate-500">{t('history.pointsEarned')}</p>
               <p className="mt-1 font-mono text-2xl font-bold text-slate-900 tabular-nums">
-                {totalAwardedPoints} pts
+                {totalAwardedPoints} {t('common.pts')}
               </p>
             </div>
           </div>
@@ -127,12 +128,12 @@ export const HistoryDashboardPage: React.FC = () => {
           <div className="grid gap-6 lg:grid-cols-2">
             <section className="rounded-lg border border-slate-200 bg-white p-5">
               <h2 className="font-display text-base font-semibold text-slate-900">
-                Issues You Reported ({reportedByMe.length})
+                {t('history.youReported', {count: reportedByMe.length})}
               </h2>
               <div className="mt-3 divide-y divide-slate-100">
                 {reportedByMe.length === 0 ? (
                   <p className="py-6 text-xs text-slate-500">
-                    You have not submitted a report in this session yet.
+                    {t('history.noneReported')}
                   </p>
                 ) : (
                   reportedByMe.map((issue) => (
@@ -153,7 +154,7 @@ export const HistoryDashboardPage: React.FC = () => {
                         to={`/issues/${issue.id}`}
                         className="inline-flex min-h-9 items-center gap-1 rounded border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 shrink-0"
                       >
-                        <span>View</span>
+                        <span>{t('history.viewBtn')}</span>
                         <ArrowUpRight className="h-3.5 w-3.5" />
                       </Link>
                     </div>
@@ -164,12 +165,12 @@ export const HistoryDashboardPage: React.FC = () => {
 
             <section className="rounded-lg border border-slate-200 bg-white p-5">
               <h2 className="font-display text-base font-semibold text-slate-900">
-                Issues You Supported ({supportedByMe.length})
+                {t('history.youSupported', {count: supportedByMe.length})}
               </h2>
               <div className="mt-3 divide-y divide-slate-100">
                 {supportedByMe.length === 0 ? (
                   <p className="py-6 text-xs text-slate-500">
-                    Upvote nearby complaints on the Home Map to support community resolution.
+                    {t('history.noneSupported')}
                   </p>
                 ) : (
                   supportedByMe.map((issue) => (
@@ -184,7 +185,7 @@ export const HistoryDashboardPage: React.FC = () => {
                         <p className="mt-0.5 text-xs text-slate-500">
                           {issue.approximateArea} ·{' '}
                           <span className="font-mono tabular-nums">
-                            {issue.upvotedByUserIds.length} votes
+                            {t('history.votesCount', {count: issue.upvotedByUserIds.length})}
                           </span>
                         </p>
                       </div>
@@ -192,7 +193,7 @@ export const HistoryDashboardPage: React.FC = () => {
                         to={`/issues/${issue.id}`}
                         className="inline-flex min-h-9 items-center gap-1 rounded border border-slate-200 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 shrink-0"
                       >
-                        <span>View</span>
+                        <span>{t('history.viewBtn')}</span>
                         <ArrowUpRight className="h-3.5 w-3.5" />
                       </Link>
                     </div>
@@ -206,21 +207,21 @@ export const HistoryDashboardPage: React.FC = () => {
         <div className="space-y-6">
           <div className="rounded-lg border border-slate-200 bg-white p-4">
             <p className="text-xs font-medium text-slate-500 mb-2">
-              Administrative Hierarchy Level (Sample Aggregated Dataset)
+              {t('history.levelSelector')}
             </p>
             <div className="flex flex-wrap gap-2">
-              {LEVELS.map((lvl) => (
+              {LEVEL_IDS.map((lvlId) => (
                 <button
-                  key={lvl.id}
+                  key={lvlId}
                   type="button"
-                  onClick={() => setSelectedLevel(lvl.id)}
+                  onClick={() => setSelectedLevel(lvlId)}
                   className={`min-h-10 rounded-md border px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer ${
-                    selectedLevel === lvl.id
+                    selectedLevel === lvlId
                       ? 'border-indigo-600 bg-indigo-600 text-white'
                       : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
                   }`}
                 >
-                  {lvl.label}
+                  {t(`history.level.${lvlId}` as Parameters<typeof t>[0])}
                 </button>
               ))}
             </div>
@@ -230,9 +231,9 @@ export const HistoryDashboardPage: React.FC = () => {
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-100 pb-4">
               <div>
                 <p className="text-xs font-medium text-indigo-600">
-                  {communityNode.level.toUpperCase()}
+                  {t(`history.level.${communityNode.level}` as Parameters<typeof t>[0]).toUpperCase()}
                   {communityNode.parentName
-                    ? ` · Part of ${communityNode.parentName}`
+                    ? ` · ${t('history.partOf', {parent: communityNode.parentName})}`
                     : ''}
                 </p>
                 <h2 className="mt-1 font-display text-xl font-bold text-slate-900">
@@ -240,31 +241,31 @@ export const HistoryDashboardPage: React.FC = () => {
                 </h2>
               </div>
               <span className="font-mono text-sm font-semibold text-emerald-700 tabular-nums">
-                {resolutionRate}% Resolution Rate
+                {t('history.resolutionRate', {pct: resolutionRate})}
               </span>
             </div>
 
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
-                <p className="text-xs text-slate-500">Complaints Reported</p>
+                <p className="text-xs text-slate-500">{t('history.totalReported')}</p>
                 <p className="mt-1 font-mono text-2xl font-bold text-slate-900 tabular-nums">
                   {communityNode.reportedCount.toLocaleString('en-IN')}
                 </p>
               </div>
               <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
-                <p className="text-xs text-slate-500">Pending</p>
+                <p className="text-xs text-slate-500">{t('common.pending')}</p>
                 <p className="mt-1 font-mono text-2xl font-bold text-amber-700 tabular-nums">
                   {communityNode.pendingCount.toLocaleString('en-IN')}
                 </p>
               </div>
               <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
-                <p className="text-xs text-slate-500">Resolved</p>
+                <p className="text-xs text-slate-500">{t('common.resolved')}</p>
                 <p className="mt-1 font-mono text-2xl font-bold text-emerald-700 tabular-nums">
                   {communityNode.resolvedCount.toLocaleString('en-IN')}
                 </p>
               </div>
               <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
-                <p className="text-xs text-slate-500">Critical Tracked</p>
+                <p className="text-xs text-slate-500">{t('history.criticalAlerts')}</p>
                 <p className="mt-1 font-mono text-2xl font-bold text-red-600 tabular-nums">
                   {communityNode.criticalCount.toLocaleString('en-IN')}
                 </p>
@@ -274,7 +275,7 @@ export const HistoryDashboardPage: React.FC = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
                 <BarChart3 className="h-4 w-4 text-indigo-600" />
-                <span>Common Issue Categories &amp; Improvement Trend</span>
+                <span>{t('history.topCategories')}</span>
               </div>
 
               <div className="space-y-2.5">
@@ -287,7 +288,7 @@ export const HistoryDashboardPage: React.FC = () => {
                     <div key={item.category} className="space-y-1">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-medium text-slate-800">
-                          {CATEGORY_MAP[item.category].label}
+                          {tc(item.category)}
                         </span>
                         <span className="font-mono text-slate-600 tabular-nums">
                           {item.count.toLocaleString('en-IN')} ({pct}%)
@@ -305,7 +306,7 @@ export const HistoryDashboardPage: React.FC = () => {
               </div>
 
               <p className="pt-2 text-xs text-slate-600">
-                <strong>Trend Note:</strong> {communityNode.monthlyTrendLabel} · Aggregated counts only—no personal reporter PII or exact addresses exposed.
+                <strong>{t('history.trendNote')}</strong> {communityNode.monthlyTrendLabel}
               </p>
             </div>
           </div>

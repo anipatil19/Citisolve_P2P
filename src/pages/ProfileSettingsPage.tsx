@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {
   AlertTriangle,
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import {DEMO_LOCALITIES, SUPPORTED_LANGUAGES} from '../constants/civicDomain';
 import {useCitiSolve} from '../context/CitiSolveContext';
+import {useTranslation} from '../i18n/useTranslation';
 import type {
   PrivacyDisplayPreference,
   SupportedLanguageCode,
@@ -26,13 +27,17 @@ export const ProfileSettingsPage: React.FC = () => {
     requestLiveLocationAccess,
     requestCameraAccess,
   } = useCitiSolve();
+  const {lang, setLang, t} = useTranslation();
   const navigate = useNavigate();
 
   const [name, setName] = useState(currentUser?.name ?? '');
   const [phone, setPhone] = useState(currentUser?.phone ?? '');
   const [language, setLanguage] = useState<SupportedLanguageCode>(
-    currentUser?.preferredLanguage ?? 'en'
+    currentUser?.preferredLanguage ?? lang
   );
+  useEffect(() => {
+    setLanguage(lang);
+  }, [lang]);
   const [localityIdx, setLocalityIdx] = useState(() => {
     const idx = DEMO_LOCALITIES.findIndex(
       (l) => l.ward === currentUser?.hierarchy.ward
@@ -68,7 +73,8 @@ export const ProfileSettingsPage: React.FC = () => {
       notificationsEnabled,
       smsUpdatesEnabled,
     });
-    setSaveMessage('Profile and privacy preferences updated.');
+    setLang(language);
+    setSaveMessage(t('profile.savedBanner'));
     window.setTimeout(() => setSaveMessage(null), 3500);
   };
 
@@ -95,10 +101,10 @@ export const ProfileSettingsPage: React.FC = () => {
     <div className="mx-auto max-w-4xl space-y-6">
       <div className="rounded-lg border border-slate-200 bg-white p-6">
         <h1 className="font-display text-2xl font-bold text-slate-900">
-          Citizen Profile &amp; Privacy Settings
+          {t('profile.title')}
         </h1>
         <p className="mt-1 text-sm text-slate-600">
-          Manage your contact details, preferred Indian language, leaderboard privacy mode, location permissions, and account controls.
+          {t('profile.subtitle')}
         </p>
       </div>
 
@@ -117,7 +123,7 @@ export const ProfileSettingsPage: React.FC = () => {
         className="rounded-lg border border-slate-200 bg-white p-6 space-y-5"
       >
         <h2 className="font-display text-lg font-semibold text-slate-900">
-          Personal &amp; Ward Details
+          {t('profile.personalInfo')}
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -126,7 +132,7 @@ export const ProfileSettingsPage: React.FC = () => {
               htmlFor="prof-name"
               className="block text-xs font-medium text-slate-700"
             >
-              Full Name
+              {t('profile.fullName')}
             </label>
             <input
               id="prof-name"
@@ -143,7 +149,7 @@ export const ProfileSettingsPage: React.FC = () => {
               htmlFor="prof-phone"
               className="block text-xs font-medium text-slate-700"
             >
-              Phone Number (Kept Private)
+              {t('profile.phone')}
             </label>
             <input
               id="prof-phone"
@@ -160,14 +166,16 @@ export const ProfileSettingsPage: React.FC = () => {
               htmlFor="prof-lang"
               className="block text-xs font-medium text-slate-700"
             >
-              Preferred Language
+              {t('profile.languagePref')}
             </label>
             <select
               id="prof-lang"
               value={language}
-              onChange={(e) =>
-                setLanguage(e.target.value as SupportedLanguageCode)
-              }
+              onChange={(e) => {
+                const next = e.target.value as SupportedLanguageCode;
+                setLanguage(next);
+                setLang(next);
+              }}
               className="mt-1 block min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
             >
               {SUPPORTED_LANGUAGES.map((l) => (
@@ -183,7 +191,7 @@ export const ProfileSettingsPage: React.FC = () => {
               htmlFor="prof-ward"
               className="block text-xs font-medium text-slate-700"
             >
-              Locality / Municipality
+              {t('profile.wardLabel')}
             </label>
             <select
               id="prof-ward"
@@ -202,7 +210,7 @@ export const ProfileSettingsPage: React.FC = () => {
 
         <div className="border-t border-slate-100 pt-5 space-y-4">
           <h2 className="font-display text-lg font-semibold text-slate-900">
-            Privacy &amp; Notification Preferences
+            {t('profile.privacySection')}
           </h2>
 
           <div>
@@ -210,7 +218,7 @@ export const ProfileSettingsPage: React.FC = () => {
               htmlFor="prof-privacy"
               className="block text-xs font-medium text-slate-700"
             >
-              Public Display Name on Leaderboards &amp; Reports
+              {t('profile.privacyLabel')}
             </label>
             <select
               id="prof-privacy"
@@ -220,10 +228,10 @@ export const ProfileSettingsPage: React.FC = () => {
               }
               className="mt-1 block min-h-11 w-full max-w-md rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
             >
-              <option value="full_name">Display Full Name</option>
-              <option value="initials">Display Initials Only (e.g., A. D.)</option>
+              <option value="full_name">{t('profile.privacyFull')}</option>
+              <option value="initials">{t('profile.privacyInitials')}</option>
               <option value="ward_resident_alias">
-                Anonymous Alias (Ward Citizen Contributor)
+                {t('profile.privacyAlias')}
               </option>
             </select>
           </div>
@@ -235,7 +243,7 @@ export const ProfileSettingsPage: React.FC = () => {
                 checked={notificationsEnabled}
                 onChange={(e) => setNotificationsEnabled(e.target.checked)}
               />
-              <span>In-app complaint lifecycle &amp; escalation alerts</span>
+              <span>{t('profile.enablePush')}</span>
             </label>
             <label className="flex items-center gap-2.5 cursor-pointer">
               <input
@@ -243,7 +251,7 @@ export const ProfileSettingsPage: React.FC = () => {
                 checked={smsUpdatesEnabled}
                 onChange={(e) => setSmsUpdatesEnabled(e.target.checked)}
               />
-              <span>SMS / WhatsApp resolution confirmation updates (when connected)</span>
+              <span>{t('profile.enableSms')}</span>
             </label>
           </div>
         </div>
@@ -253,21 +261,21 @@ export const ProfileSettingsPage: React.FC = () => {
             type="submit"
             className="min-h-11 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer"
           >
-            Save Profile Changes
+            {t('profile.saveBtn')}
           </button>
         </div>
       </form>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
         <h2 className="font-display text-base font-semibold text-slate-900">
-          Device Permissions (Location &amp; Camera)
+          {t('profile.permissionsSection')}
         </h2>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div>
-            <p className="text-sm font-semibold text-slate-800">Location Permission</p>
+            <p className="text-sm font-semibold text-slate-800">{t('auth.locationPermission')}</p>
             <p className="mt-0.5 text-xs text-slate-600">
-              State:{' '}
+              {t('profile.stateLabel')}{' '}
               <span className="font-mono font-semibold text-slate-800">
                 {currentUser.locationPermission}
               </span>{' '}
@@ -281,19 +289,18 @@ export const ProfileSettingsPage: React.FC = () => {
             className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-indigo-700 cursor-pointer"
           >
             <MapPin className="h-3.5 w-3.5" />
-            <span>Enable / Re-check GPS</span>
+            <span>{t('profile.requestGpsBtn')}</span>
           </button>
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-sm font-semibold text-slate-800">Live Camera Permission</p>
+            <p className="text-sm font-semibold text-slate-800">{t('auth.cameraPermission')}</p>
             <p className="mt-0.5 text-xs text-slate-600">
-              State:{' '}
+              {t('profile.stateLabel')}{' '}
               <span className="font-mono font-semibold text-slate-800">
                 {currentUser.cameraPermission ?? 'prompt'}
-              </span>{' '}
-              · Required for in-app evidence capture
+              </span>
             </p>
           </div>
 
@@ -303,14 +310,14 @@ export const ProfileSettingsPage: React.FC = () => {
             className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-800 hover:bg-slate-50 cursor-pointer"
           >
             <Camera className="h-3.5 w-3.5 text-indigo-600" />
-            <span>Enable / Test Camera</span>
+            <span>{t('profile.requestCamBtn')}</span>
           </button>
         </div>
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-white p-6 space-y-4">
         <h2 className="font-display text-base font-semibold text-slate-900">
-          Session &amp; Account Management
+          {t('profile.dangerZone')}
         </h2>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -322,7 +329,7 @@ export const ProfileSettingsPage: React.FC = () => {
             className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50 cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
-            <span>Log Out</span>
+            <span>{t('profile.logoutBtn')}</span>
           </button>
 
           <button
@@ -331,7 +338,7 @@ export const ProfileSettingsPage: React.FC = () => {
             className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
           >
             <RotateCcw className="h-4 w-4" />
-            <span>Reset Sample Data</span>
+            <span>{t('profile.resetBtn')}</span>
           </button>
 
           <button
@@ -343,7 +350,7 @@ export const ProfileSettingsPage: React.FC = () => {
             className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-100 cursor-pointer"
           >
             <Trash2 className="h-4 w-4" />
-            <span>Delete Account</span>
+            <span>{t('profile.deleteBtn')}</span>
           </button>
         </div>
       </div>
@@ -352,7 +359,7 @@ export const ProfileSettingsPage: React.FC = () => {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Confirm account deletion"
+          aria-label={t('profile.deleteModalTitle')}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
         >
           <div className="w-full max-w-md rounded-lg border border-slate-200 bg-white p-6 shadow-xl space-y-4">
@@ -360,10 +367,10 @@ export const ProfileSettingsPage: React.FC = () => {
               <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />
               <div>
                 <h3 className="font-display text-lg font-bold text-slate-900">
-                  Confirm Permanent Account Deletion
+                  {t('profile.deleteModalTitle')}
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                  This removes your citizen profile and session reward ledger from local demonstration storage. Type <strong className="font-mono">DELETE</strong> below to confirm.
+                  {t('profile.deleteModalDesc')}
                 </p>
               </div>
             </div>
@@ -372,7 +379,7 @@ export const ProfileSettingsPage: React.FC = () => {
               type="text"
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="Type DELETE"
+              placeholder={t('profile.typeDeletePlaceholder')}
               className="block min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-sm text-slate-900"
             />
 
@@ -382,7 +389,7 @@ export const ProfileSettingsPage: React.FC = () => {
                 onClick={() => setDeleteModalOpen(false)}
                 className="min-h-10 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-800 hover:bg-slate-50 cursor-pointer"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -390,7 +397,7 @@ export const ProfileSettingsPage: React.FC = () => {
                 onClick={handleConfirmDelete}
                 className="min-h-10 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 disabled:opacity-40 cursor-pointer"
               >
-                Delete My Account
+                {t('profile.deleteConfirmBtn')}
               </button>
             </div>
           </div>

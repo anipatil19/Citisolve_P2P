@@ -17,14 +17,14 @@ import {
   SeverityLabel,
 } from '../components/common/SeverityAndStatus';
 import {
-  CATEGORY_MAP,
   COMPLAINT_LIFECYCLE_STAGES,
-  SEVERITY_CONFIG,
 } from '../constants/civicDomain';
 import {useCitiSolve} from '../context/CitiSolveContext';
+import {useTranslation} from '../i18n/useTranslation';
 
 export const IssueDetailPage: React.FC = () => {
   const {id} = useParams<{id: string}>();
+  const {t, tc, ts, tSevSla, tDept, tEsc} = useTranslation();
   const {
     currentUser,
     issues,
@@ -44,17 +44,17 @@ export const IssueDetailPage: React.FC = () => {
     return (
       <div className="mx-auto max-w-2xl rounded-lg border border-slate-200 bg-white p-8 text-center">
         <h1 className="font-display text-xl font-bold text-slate-900">
-          Complaint Not Found
+          {t('issue.notFoundTitle')}
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          The complaint ID <span className="font-mono">{id}</span> could not be found in your current demonstration session.
+          {t('issue.notFoundDesc')} (<span className="font-mono">{id}</span>)
         </p>
         <Link
           to="/home"
           className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Return to Home Map</span>
+          <span>{t('report.backHomeMapBtn')}</span>
         </Link>
       </div>
     );
@@ -89,10 +89,10 @@ export const IssueDetailPage: React.FC = () => {
           className="inline-flex min-h-10 items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900"
         >
           <ArrowLeft className="h-4 w-4" />
-          <span>Back to Citizen Map</span>
+          <span>{t('issue.returnHome')}</span>
         </Link>
         <span className="font-mono text-xs text-slate-500">
-          Dossier ID: {issue.id} · Reported {new Date(issue.createdAt).toLocaleDateString('en-IN')}
+          {t('issue.dossierId')} {issue.id} · {t('issue.reportedAt')} {new Date(issue.createdAt).toLocaleDateString('en-IN')}
         </span>
       </div>
 
@@ -121,9 +121,9 @@ export const IssueDetailPage: React.FC = () => {
 
               <div className="flex items-center gap-2 text-xs text-slate-500">
                 <CategoryIcon category={issue.category} className="h-4 w-4 text-indigo-600" />
-                <span>{CATEGORY_MAP[issue.category].label}</span>
+                <span>{tc(issue.category)}</span>
                 <span aria-hidden="true">·</span>
-                <span>Reported by {issue.reporterAlias}</span>
+                <span>{t('issue.reportedBy')} {issue.reporterAlias}</span>
               </div>
 
               <h1 className="font-display text-2xl font-bold text-slate-900">
@@ -141,7 +141,7 @@ export const IssueDetailPage: React.FC = () => {
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <Building2 className="h-3.5 w-3.5 text-slate-400" />
-                  {issue.assignedDepartments.join(' + ')}
+                  {issue.assignedDepartments.map((d) => tDept(d)).join(' + ')}
                 </span>
               </div>
             </div>
@@ -149,27 +149,27 @@ export const IssueDetailPage: React.FC = () => {
 
           <div className="rounded-lg border border-slate-200 bg-white p-6 space-y-4">
             <h2 className="font-display text-lg font-semibold text-slate-900">
-              AI Triage &amp; Safety Explanation
+              {t('issue.aiTriageTitle')}
             </h2>
             <div className="rounded-md border border-slate-200 bg-slate-50 p-4 text-xs space-y-2">
               <p className="font-semibold text-slate-800">
-                Source: {issue.aiAnalysis.modelOrRule}
+                {t('issue.sourceLabel')} {issue.aiAnalysis.modelOrRule}
               </p>
               <p className="text-slate-700">
-                <strong>Safety Severity Reasoning:</strong> {issue.severityReason}
+                <strong>{t('issue.severityReasoning')}</strong> {issue.severityReason}
               </p>
               <p className="text-slate-700">
-                <strong>Routing Explanation:</strong>{' '}
+                <strong>{t('issue.routingExplanation')}</strong>{' '}
                 {issue.aiAnalysis.classificationExplanation}
               </p>
               <p className="text-slate-500">
-                Confidence:{' '}
+                {t('issue.confidenceLabel')}{' '}
                 <span className="font-mono tabular-nums">
                   {Math.round(issue.aiAnalysis.confidence * 100)}%
                 </span>{' '}
                 {issue.aiAnalysis.needsHumanReview
-                  ? '· Flagged for human verification'
-                  : '· Standard confidence'}
+                  ? t('issue.flaggedHuman')
+                  : t('issue.standardConf')}
               </p>
             </div>
           </div>
@@ -180,10 +180,10 @@ export const IssueDetailPage: React.FC = () => {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="font-display text-base font-semibold text-slate-900">
-                  Community Support (Separate from Safety)
+                  {t('issue.communitySupport')}
                 </h2>
                 <p className="mt-1 text-xs text-slate-600">
-                  One active upvote per account. Upvotes measure community impact and never downgrade or inflate physical safety severity.
+                  {t('issue.communitySupportDesc')}
                 </p>
               </div>
               <span className="font-mono text-2xl font-bold text-indigo-600 tabular-nums">
@@ -203,20 +203,20 @@ export const IssueDetailPage: React.FC = () => {
               <ThumbsUp className="h-4 w-4" />
               <span>
                 {hasVoted
-                  ? 'Remove Your Support Vote'
-                  : 'Support / Upvote This Issue'}
+                  ? t('issue.removeVote')
+                  : t('issue.addVote')}
               </span>
             </button>
 
             {issue.status === 'resolved_awaiting_confirmation' && (
               <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-4 space-y-2.5">
                 <p className="text-xs font-semibold text-indigo-900">
-                  Department marked work complete — citizen confirmation requested
+                  {t('issue.confirmPromptTitle')}
                 </p>
                 {issue.resolutionEvidence && (
                   <div className="rounded-lg border border-indigo-100 bg-white p-2.5 text-xs text-slate-700 space-y-1.5">
                     <p className="font-semibold text-slate-900">
-                      Official Resolution Note:
+                      {t('issue.officialResNote')}
                     </p>
                     <p>{issue.resolutionEvidence.note}</p>
                     {issue.resolutionEvidence.photoUrl && (
@@ -234,7 +234,7 @@ export const IssueDetailPage: React.FC = () => {
                   className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 cursor-pointer"
                 >
                   <CheckCircle2 className="h-4 w-4" />
-                  <span>Confirm Issue Is Resolved (+10 pts)</span>
+                  <span>{t('issue.confirmBtn', {pts: 10})}</span>
                 </button>
 
                 {!showDisputeForm ? (
@@ -246,7 +246,7 @@ export const IssueDetailPage: React.FC = () => {
                     }}
                     className="flex min-h-10 w-full items-center justify-center rounded-xl border border-orange-300 bg-white px-4 py-2 text-xs font-semibold text-orange-800 hover:bg-orange-50 cursor-pointer"
                   >
-                    Dispute Resolution (Issue Persists)
+                    {t('issue.disputeBtn')}
                   </button>
                 ) : (
                   <div className="space-y-2 rounded-lg border border-orange-200 bg-white p-3">
@@ -254,14 +254,14 @@ export const IssueDetailPage: React.FC = () => {
                       htmlFor="citizen-dispute-reason"
                       className="block text-[11px] font-semibold text-slate-700"
                     >
-                      Why is this issue not resolved?
+                      {t('issue.disputeWhy')}
                     </label>
                     <textarea
                       id="citizen-dispute-reason"
                       rows={2}
                       value={disputeReason}
                       onChange={(e) => setDisputeReason(e.target.value)}
-                      placeholder="Describe what remains unresolved on-site..."
+                      placeholder={t('issue.disputeReasonPlaceholder')}
                       className="w-full rounded-md border border-slate-200 p-2 text-xs"
                     />
                     {disputeError && (
@@ -275,27 +275,25 @@ export const IssueDetailPage: React.FC = () => {
                         onClick={() => {
                           if (disputeReason.trim().length < 5) {
                             setDisputeError(
-                              'Please enter a brief explanation (at least 5 characters).'
+                              t('issue.disputeReasonPlaceholder')
                             );
                             return;
                           }
                           disputeComplaintResolution(issue.id, disputeReason);
                           setShowDisputeForm(false);
                           setDisputeReason('');
-                          setFeedback(
-                            'Dispute submitted. Complaint has been returned to the municipal department for review.'
-                          );
+                          setFeedback(t('issue.disputedReturned'));
                         }}
                         className="min-h-9 flex-1 rounded-lg bg-orange-600 px-3 text-xs font-semibold text-white hover:bg-orange-700 cursor-pointer"
                       >
-                        Submit Dispute
+                        {t('issue.submitDisputeBtn')}
                       </button>
                       <button
                         type="button"
                         onClick={() => setShowDisputeForm(false)}
                         className="min-h-9 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-600 hover:bg-slate-50 cursor-pointer"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                     </div>
                   </div>
@@ -306,7 +304,7 @@ export const IssueDetailPage: React.FC = () => {
             {issue.citizenDispute && (
               <div className="rounded-xl border border-orange-200 bg-orange-50 p-3 text-xs text-orange-900">
                 <p className="font-semibold">
-                  Resolution Disputed — Returned to Department Review
+                  {t('issue.disputedReturned')}
                 </p>
                 <p className="mt-0.5 text-orange-800">
                   &ldquo;{issue.citizenDispute.reason}&rdquo;
@@ -318,10 +316,10 @@ export const IssueDetailPage: React.FC = () => {
           <div className="rounded-lg border border-slate-200 bg-white p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-display text-base font-semibold text-slate-900">
-                Lifecycle &amp; Escalation Progress
+                {t('issue.timelineTitle')}
               </h2>
               <span className="font-mono text-xs text-slate-500">
-                {SEVERITY_CONFIG[issue.safetySeverity].slaText}
+                {tSevSla(issue.safetySeverity)}
               </span>
             </div>
 
@@ -340,19 +338,17 @@ export const IssueDetailPage: React.FC = () => {
                     <AlertTriangle className="h-4 w-4" />
                   )}
                   <span>
-                    {issue.escalation.state === 'escalation_acknowledged'
-                      ? 'Escalation Acknowledged by Higher Authority'
-                      : 'Escalation Initiated — Awaiting Authority Acknowledgement'}
+                    {tEsc(issue.escalation.state)}
                   </span>
                 </p>
-                <p>Authority: {issue.escalation.nextAuthorityLevel}</p>
+                <p>{t('issue.nextAuthority')} {issue.escalation.nextAuthorityLevel}</p>
                 <p>{issue.escalation.reason}</p>
               </div>
             )}
 
             <ol className="space-y-3">
               {COMPLAINT_LIFECYCLE_STAGES.map((stage, idx) => {
-                const recorded = issue.timeline.find((t) => t.stage === stage.id);
+                const recorded = issue.timeline.find((tl) => tl.stage === stage.id);
                 const reached = idx <= currentStageIdx;
                 return (
                   <li key={stage.id} className="flex items-start gap-3">
@@ -371,7 +367,7 @@ export const IssueDetailPage: React.FC = () => {
                           reached ? 'text-slate-900' : 'text-slate-400'
                         }`}
                       >
-                        {stage.label}
+                        {ts(stage.id)}
                       </p>
                       {recorded ? (
                         <>
@@ -387,7 +383,7 @@ export const IssueDetailPage: React.FC = () => {
                         </>
                       ) : (
                         <p className="mt-0.5 text-[11px] text-slate-400">
-                          Not yet recorded
+                          {t('issue.notYetRecorded')}
                         </p>
                       )}
                     </div>

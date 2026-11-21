@@ -13,9 +13,9 @@ import {
 } from '../../components/common/SeverityAndStatus';
 import {DEFAULT_SLA_BY_SEVERITY} from '../../constants/civicDomain';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 import type {EscalationState, SafetySeverity} from '../../types/civic';
 import {
-  getEscalationDisplayLabel,
   getIssueDueAt,
   isIssueApproachingDeadline,
   isIssueClosed,
@@ -25,12 +25,12 @@ import {
 
 const ESCALATION_FLOW: Array<{
   state: EscalationState;
-  label: string;
+  labelKey: 'offEsc.stepInitiated' | 'offEsc.stepTransmitted' | 'offEsc.stepReceived' | 'offEsc.stepAcknowledged';
 }> = [
-  {state: 'escalation_initiated', label: 'Initiated'},
-  {state: 'transmitted', label: 'Transmitted'},
-  {state: 'received', label: 'Receipt Confirmed'},
-  {state: 'escalation_acknowledged', label: 'Authority Acknowledged'},
+  {state: 'escalation_initiated', labelKey: 'offEsc.stepInitiated'},
+  {state: 'transmitted', labelKey: 'offEsc.stepTransmitted'},
+  {state: 'received', labelKey: 'offEsc.stepReceived'},
+  {state: 'escalation_acknowledged', labelKey: 'offEsc.stepAcknowledged'},
 ];
 
 export const OfficialEscalationsPage: React.FC = () => {
@@ -40,6 +40,7 @@ export const OfficialEscalationsPage: React.FC = () => {
     updateOfficialSlaConfig,
     advanceOfficialEscalation,
   } = useCitiSolve();
+  const {t, tSev, tDept, tEsc} = useTranslation();
 
   const [draftSla, setDraftSla] = useState<Record<SafetySeverity, number>>({...slaConfig});
   const [authorityDraft, setAuthorityDraft] = useState<Record<string, string>>({});
@@ -100,10 +101,10 @@ export const OfficialEscalationsPage: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-xl font-bold text-[#0F172A]">
-          Escalation Management &amp; SLA Controls
+          {t('offEsc.title')}
         </h1>
         <p className="text-xs text-slate-600">
-          Monitor overdue &amp; approaching SLA deadlines, configure severity targets, and track explicit 4-state escalation verification without assuming unconfirmed receipt.
+          {t('offEsc.subtitle')}
         </p>
       </div>
 
@@ -120,13 +121,13 @@ export const OfficialEscalationsPage: React.FC = () => {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="rounded-lg border border-red-200 bg-red-50/70 p-4">
           <p className="text-[11px] font-semibold uppercase text-red-700">
-            Overdue SLA
+            {t('offEsc.overdueCount')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-red-800">{overdueCount}</p>
         </div>
         <div className="rounded-lg border border-amber-200 bg-amber-50/70 p-4">
           <p className="text-[11px] font-semibold uppercase text-amber-800">
-            Approaching Deadline
+            {t('offEsc.approachingDeadline')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-amber-900">
             {approachingCount}
@@ -134,7 +135,7 @@ export const OfficialEscalationsPage: React.FC = () => {
         </div>
         <div className="rounded-lg border border-orange-200 bg-orange-50/70 p-4">
           <p className="text-[11px] font-semibold uppercase text-orange-800">
-            Active Escalations
+            {t('offEsc.activeEscalations')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-orange-900">
             {escalatedCount}
@@ -142,7 +143,7 @@ export const OfficialEscalationsPage: React.FC = () => {
         </div>
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-4">
           <p className="text-[11px] font-semibold uppercase text-slate-500">
-            Attention Queue
+            {t('offEsc.attentionQueue')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-[#0F172A]">
             {attentionIssues.length}
@@ -156,7 +157,7 @@ export const OfficialEscalationsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <Settings2 className="h-4 w-4 text-[#0F766E]" />
             <h2 className="font-display text-base font-bold text-[#0F172A]">
-              Configurable SLA Deadlines (Hours by Severity)
+              {t('offEsc.slaFormTitle')}
             </h2>
           </div>
           <button
@@ -164,11 +165,11 @@ export const OfficialEscalationsPage: React.FC = () => {
             onClick={() => {
               setDraftSla({...DEFAULT_SLA_BY_SEVERITY});
               updateOfficialSlaConfig({...DEFAULT_SLA_BY_SEVERITY});
-              setFeedback('SLA targets reset to municipal defaults.');
+              setFeedback(t('offAna.slaSavedMsg'));
             }}
             className="text-xs font-semibold text-[#0F766E] hover:underline cursor-pointer"
           >
-            Reset to Defaults
+            {t('offEsc.resetDefaultsBtn')}
           </button>
         </div>
 
@@ -179,7 +180,7 @@ export const OfficialEscalationsPage: React.FC = () => {
                 htmlFor={`sla-${sev}`}
                 className="block text-[11px] font-semibold uppercase text-slate-600 mb-1"
               >
-                {sev} (hours)
+                {tSev(sev)}
               </label>
               <input
                 id={`sla-${sev}`}
@@ -201,7 +202,7 @@ export const OfficialEscalationsPage: React.FC = () => {
             type="submit"
             className="min-h-9 rounded-md bg-[#0F766E] px-4 text-xs font-semibold text-white hover:bg-[#115E59] cursor-pointer"
           >
-            Apply SLA Rules
+            {t('offEsc.applySlaBtn')}
           </button>
         </form>
       </section>
@@ -209,12 +210,12 @@ export const OfficialEscalationsPage: React.FC = () => {
       {/* Escalation Queue */}
       <section className="space-y-3">
         <h2 className="font-display text-base font-bold text-[#0F172A]">
-          Escalated, Overdue &amp; Critical SLA Queue
+          {t('offEsc.queueHeading')}
         </h2>
 
         {attentionIssues.length === 0 ? (
           <div className="rounded-lg border border-[#E2E8F0] bg-white p-6 text-xs text-slate-500">
-            No overdue or escalated complaints currently in your jurisdiction.
+            {t('offEsc.emptyQueue')}
           </div>
         ) : (
           attentionIssues.map((issue) => {
@@ -240,13 +241,13 @@ export const OfficialEscalationsPage: React.FC = () => {
                       {overdue && (
                         <span className="inline-flex items-center gap-1 rounded border border-red-200 bg-red-50 px-2 py-0.5 text-[11px] font-bold text-red-700">
                           <AlertTriangle className="h-3 w-3" />
-                          OVERDUE
+                          {t('offDash.overdueTag')}
                         </span>
                       )}
                       {!overdue && approaching && (
                         <span className="inline-flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800">
                           <Clock className="h-3 w-3" />
-                          APPROACHING SLA
+                          {t('offEsc.approachingTag')}
                         </span>
                       )}
                     </div>
@@ -254,9 +255,9 @@ export const OfficialEscalationsPage: React.FC = () => {
                       {issue.title}
                     </h3>
                     <p className="text-xs text-slate-600">
-                      {issue.approximateArea} · {issue.assignedDepartments.join(' + ')} ·{' '}
+                      {issue.approximateArea} · {issue.assignedDepartments.map((d) => tDept(d)).join(' + ')} ·{' '}
                       <span className="font-mono">
-                        Due {dueAt.toLocaleString('en-IN')}
+                        {t('offEsc.dueLabel')} {dueAt.toLocaleString('en-IN')}
                       </span>
                     </p>
                   </div>
@@ -265,7 +266,7 @@ export const OfficialEscalationsPage: React.FC = () => {
                     to={`/official/complaints/${issue.id}`}
                     className="inline-flex min-h-9 items-center gap-1 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 text-xs font-semibold text-[#0F766E] hover:bg-slate-100"
                   >
-                    <span>Open Dossier</span>
+                    <span>{t('offEsc.openDossier')}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
@@ -275,10 +276,10 @@ export const OfficialEscalationsPage: React.FC = () => {
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                     <span className="inline-flex items-center gap-1.5 font-semibold text-[#0F172A]">
                       <ShieldAlert className="h-4 w-4 text-[#0F766E]" />
-                      Escalation Status: {getEscalationDisplayLabel(escState)}
+                      {t('offEsc.escStatusLabel')} {tEsc(escState)}
                     </span>
                     <span className="text-[11px] text-slate-500">
-                      Receiving Authority:{' '}
+                      {t('offEsc.receivingAuthority')}{' '}
                       <strong>
                         {issue.escalation.nextAuthorityLevel ??
                           'Higher Municipal Escalation Desk'}
@@ -307,9 +308,9 @@ export const OfficialEscalationsPage: React.FC = () => {
                               : 'border-[#E2E8F0] bg-white text-slate-400'
                           }`}
                         >
-                          <p className="font-bold">{step.label}</p>
+                          <p className="font-bold">{t(step.labelKey)}</p>
                           <p className="font-mono mt-0.5">
-                            {ts ? new Date(ts).toLocaleString('en-IN') : 'Pending confirmation'}
+                            {ts ? new Date(ts).toLocaleString('en-IN') : t('offEsc.pendingConfirm')}
                           </p>
                         </div>
                       );
@@ -318,7 +319,7 @@ export const OfficialEscalationsPage: React.FC = () => {
 
                   {issue.escalation.reason && (
                     <p className="text-xs text-slate-600">
-                      Reason: {issue.escalation.reason}
+                      {issue.escalation.reason}
                     </p>
                   )}
 
@@ -336,7 +337,7 @@ export const OfficialEscalationsPage: React.FC = () => {
                         }
                         placeholder={
                           issue.escalation.nextAuthorityLevel ??
-                          'Receiving authority (e.g., Zonal Commissioner)'
+                          t('offEsc.authorityPlaceholder')
                         }
                         className="min-h-8 rounded border border-[#E2E8F0] bg-white px-2.5 text-xs"
                       />
@@ -349,7 +350,7 @@ export const OfficialEscalationsPage: React.FC = () => {
                             [issue.id]: e.target.value,
                           }))
                         }
-                        placeholder="Escalation log note (optional)..."
+                        placeholder={t('offEsc.notePlaceholder')}
                         className="min-h-8 rounded border border-[#E2E8F0] bg-white px-2.5 text-xs"
                       />
                       <div className="flex flex-wrap gap-1.5">
@@ -365,7 +366,7 @@ export const OfficialEscalationsPage: React.FC = () => {
                             }
                             className="min-h-8 flex-1 rounded bg-[#0F766E] px-3 text-xs font-semibold text-white hover:bg-[#115E59] cursor-pointer"
                           >
-                            Initiate Escalation
+                            {t('offEsc.btnInitiate')}
                           </button>
                         )}
                         {escState === 'escalation_initiated' && (
@@ -380,7 +381,7 @@ export const OfficialEscalationsPage: React.FC = () => {
                             }
                             className="min-h-8 flex-1 rounded bg-[#0F766E] px-3 text-xs font-semibold text-white hover:bg-[#115E59] cursor-pointer"
                           >
-                            Mark Transmitted
+                            {t('offEsc.btnTransmit')}
                           </button>
                         )}
                         {escState === 'transmitted' && (
@@ -395,7 +396,7 @@ export const OfficialEscalationsPage: React.FC = () => {
                             }
                             className="min-h-8 flex-1 rounded bg-[#0F766E] px-3 text-xs font-semibold text-white hover:bg-[#115E59] cursor-pointer"
                           >
-                            Confirm Receipt
+                            {t('offEsc.btnConfirmReceipt')}
                           </button>
                         )}
                         {escState === 'received' && (
@@ -410,7 +411,7 @@ export const OfficialEscalationsPage: React.FC = () => {
                             }
                             className="min-h-8 flex-1 rounded bg-[#0F766E] px-3 text-xs font-semibold text-white hover:bg-[#115E59] cursor-pointer"
                           >
-                            Mark Authority Acknowledged
+                            {t('offEsc.btnAcknowledge')}
                           </button>
                         )}
                       </div>

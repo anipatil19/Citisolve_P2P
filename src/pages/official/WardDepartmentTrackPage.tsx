@@ -11,6 +11,7 @@ import {
   MUNICIPAL_DEPARTMENTS,
 } from '../../constants/civicDomain';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 import type {CivicIssue} from '../../types/civic';
 import {isIssueClosed} from '../../utils/officialHelpers';
 
@@ -22,6 +23,7 @@ export const WardDepartmentTrackPage: React.FC = () => {
     resolveOfficialComplaint,
   } = useCitiSolve();
   const navigate = useNavigate();
+  const {t, ts, tDept} = useTranslation();
 
   const [deptFilter, setDeptFilter] = useState<string>('all');
   const [solvedBanner, setSolvedBanner] = useState<CivicIssue | null>(null);
@@ -56,23 +58,23 @@ export const WardDepartmentTrackPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-[#0F172A] sm:text-2xl">
-            2. Department &amp; Complaint Report Track
+            {t('ward.trackTitle')}
           </h1>
           <p className="mt-0.5 text-xs text-slate-600">
-            Track auto-assigned complaints across every ward department and mark resolved issues as solved.
+            {t('ward.trackSubtitle')}
           </p>
         </div>
 
         <select
-          aria-label="Filter by department"
+          aria-label={t('ward.filterDept')}
           value={deptFilter}
           onChange={(e) => setDeptFilter(e.target.value)}
           className="min-h-9 rounded-md border border-[#E2E8F0] bg-white px-3 text-xs font-medium text-[#0F172A]"
         >
-          <option value="all">All Departments</option>
+          <option value="all">{t('offDept.allDepts')}</option>
           {MUNICIPAL_DEPARTMENTS.map((d) => (
             <option key={d} value={d}>
-              {d}
+              {tDept(d)}
             </option>
           ))}
         </select>
@@ -80,7 +82,7 @@ export const WardDepartmentTrackPage: React.FC = () => {
 
       {groupedByDept.length === 0 ? (
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-8 text-center text-xs text-slate-500">
-          No complaints assigned to this department in your ward yet.
+          {t('ward.noDeptComplaints')}
         </div>
       ) : (
         <div className="space-y-5">
@@ -97,15 +99,15 @@ export const WardDepartmentTrackPage: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-[#0F766E]" />
                     <h2 className="font-display text-sm font-bold text-[#0F172A]">
-                      {dept}
+                      {tDept(dept)}
                     </h2>
                   </div>
                   <div className="flex items-center gap-2 font-mono text-[11px]">
                     <span className="rounded border border-amber-200 bg-amber-50 px-2 py-0.5 font-semibold text-amber-800">
-                      {openCount} Open
+                      {openCount} {t('offDash.colOpen')}
                     </span>
                     <span className="rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">
-                      {solvedCount} Solved
+                      {solvedCount} {t('offDept.solvedTab')}
                     </span>
                   </div>
                 </div>
@@ -132,7 +134,7 @@ export const WardDepartmentTrackPage: React.FC = () => {
                               {issue.title}
                             </p>
                             <p className="text-xs text-slate-600">
-                              {issue.approximateArea} · Reported{' '}
+                              {issue.approximateArea} · {t('status.reportedLabel')}{' '}
                               {new Date(issue.createdAt).toLocaleDateString('en-IN')}
                             </p>
                           </div>
@@ -152,7 +154,7 @@ export const WardDepartmentTrackPage: React.FC = () => {
                                     }
                                     className="min-h-8 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
                                   >
-                                    Dept Received
+                                    {t('ward.markDeptReceived')}
                                   </button>
                                 )}
                                 {issue.status !== 'under_process' && (
@@ -167,7 +169,7 @@ export const WardDepartmentTrackPage: React.FC = () => {
                                     }
                                     className="min-h-8 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 cursor-pointer"
                                   >
-                                    In Process
+                                    {t('ward.markInProcess')}
                                   </button>
                                 )}
                                 <button
@@ -176,7 +178,7 @@ export const WardDepartmentTrackPage: React.FC = () => {
                                   className="inline-flex min-h-8 items-center gap-1 rounded bg-[#0F9D58] px-3 text-xs font-semibold text-white hover:bg-[#0B8043] cursor-pointer"
                                 >
                                   <CheckCircle2 className="h-3.5 w-3.5" />
-                                  <span>Mark as Solved</span>
+                                  <span>{t('ward.markSolvedQuick')}</span>
                                 </button>
                               </>
                             )}
@@ -185,7 +187,7 @@ export const WardDepartmentTrackPage: React.FC = () => {
                               to={`/official/complaints/${issue.id}`}
                               className="inline-flex min-h-8 items-center gap-1 rounded border border-[#E2E8F0] bg-white px-2.5 text-xs font-semibold text-[#0F766E] hover:bg-slate-50"
                             >
-                              <span>Details</span>
+                              <span>{t('ward.detailsBtn')}</span>
                               <ArrowUpRight className="h-3.5 w-3.5" />
                             </Link>
                           </div>
@@ -213,7 +215,7 @@ export const WardDepartmentTrackPage: React.FC = () => {
                                       : 'text-slate-400'
                                   }`}
                                 >
-                                  {stage.shortLabel}
+                                  {ts(stage.id, true)}
                                 </p>
                               </div>
                             );

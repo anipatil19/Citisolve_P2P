@@ -13,16 +13,16 @@ import {
   Wrench,
 } from 'lucide-react';
 import {CivicImage} from '../components/common/CivicImage';
+import {LanguageSelector} from '../components/common/LanguageSelector';
 import {
   ResolutionStatusLabel,
   SeverityLabel,
 } from '../components/common/SeverityAndStatus';
 import {
-  CATEGORY_MAP,
   COMPLAINT_LIFECYCLE_STAGES,
-  SEVERITY_CONFIG,
 } from '../constants/civicDomain';
 import {useCitiSolve} from '../context/CitiSolveContext';
+import {useTranslation} from '../i18n/useTranslation';
 
 type StatusFilter = 'all' | 'submitted' | 'in_progress' | 'resolved' | 'escalated';
 
@@ -45,6 +45,7 @@ export const StatusDashboardPage: React.FC = () => {
     unreadNotificationsCount,
     confirmComplaintResolution,
   } = useCitiSolve();
+  const {t, tc, ts, tsDesc, tSevSla, tDept, tEsc} = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const trackerRef = useRef<HTMLElement | null>(null);
 
@@ -156,11 +157,11 @@ export const StatusDashboardPage: React.FC = () => {
   };
 
   const filterTabs: Array<{id: StatusFilter; label: string}> = [
-    {id: 'all', label: 'All'},
-    {id: 'submitted', label: 'Submitted'},
-    {id: 'in_progress', label: 'In Progress'},
-    {id: 'resolved', label: 'Resolved'},
-    {id: 'escalated', label: 'Escalated'},
+    {id: 'all', label: t('common.all')},
+    {id: 'submitted', label: t('status.tileSubmitted')},
+    {id: 'in_progress', label: t('status.tileInProgress')},
+    {id: 'resolved', label: t('common.resolved')},
+    {id: 'escalated', label: t('status.filterEscalated')},
   ];
 
   const firstName = (currentUser?.name ?? 'Citizen').split(/\s+/)[0];
@@ -172,7 +173,7 @@ export const StatusDashboardPage: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-              My Complaints &amp; Tracking
+              {t('status.headerTitle')}
             </h1>
             <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-indigo-100 sm:text-sm">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -183,9 +184,10 @@ export const StatusDashboardPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <LanguageSelector variant="indigo" compact />
             <Link
               to="/home"
-              aria-label="Open notifications on Home"
+              aria-label={t('nav.notifications')}
               className="relative flex min-h-11 min-w-11 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 lg:hidden"
             >
               <Bell className="h-5 w-5" />
@@ -197,7 +199,7 @@ export const StatusDashboardPage: React.FC = () => {
             </Link>
             <Link
               to="/profile"
-              aria-label="Open profile"
+              aria-label={t('nav.profile')}
               className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/60 bg-indigo-500 font-display text-sm font-bold text-white lg:hidden"
             >
               {firstName.charAt(0).toUpperCase()}
@@ -220,7 +222,7 @@ export const StatusDashboardPage: React.FC = () => {
                   : 'text-indigo-100 hover:text-white'
               }`}
             >
-              My Reports
+              {t('status.myReportsTab')}
             </button>
             <button
               type="button"
@@ -231,7 +233,7 @@ export const StatusDashboardPage: React.FC = () => {
                   : 'text-indigo-100 hover:text-white'
               }`}
             >
-              All Ward Samples
+              {t('status.allWardTab')}
             </button>
           </div>
 
@@ -239,7 +241,7 @@ export const StatusDashboardPage: React.FC = () => {
             to="/report"
             className="inline-flex min-h-9 items-center rounded-xl bg-white px-3.5 py-1.5 text-xs font-bold text-indigo-700 shadow-xs hover:bg-indigo-50"
           >
-            + Report Issue
+            {t('status.reportPlusBtn')}
           </Link>
         </div>
       </section>
@@ -266,12 +268,12 @@ export const StatusDashboardPage: React.FC = () => {
             </div>
             <div className="mt-3">
               <p className="font-display text-sm font-bold text-slate-900">
-                Submitted
+                {t('status.tileSubmitted')}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
                 {sessionSubmittedIssues.length > 0
-                  ? `${sessionSubmittedIssues.length} in this session`
-                  : 'Session & queued'}
+                  ? t('status.inThisSession', {count: sessionSubmittedIssues.length})
+                  : t('status.sessionAndQueued')}
               </p>
             </div>
           </button>
@@ -295,10 +297,10 @@ export const StatusDashboardPage: React.FC = () => {
             </div>
             <div className="mt-3">
               <p className="font-display text-sm font-bold text-slate-900">
-                In Progress
+                {t('status.tileInProgress')}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
-                Department action
+                {t('status.deptAction')}
               </p>
             </div>
           </button>
@@ -322,10 +324,10 @@ export const StatusDashboardPage: React.FC = () => {
             </div>
             <div className="mt-3">
               <p className="font-display text-sm font-bold text-slate-900">
-                Resolved
+                {t('common.resolved')}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
-                Confirmed closure
+                {t('status.confirmedClosure')}
               </p>
             </div>
           </button>
@@ -349,10 +351,10 @@ export const StatusDashboardPage: React.FC = () => {
             </div>
             <div className="mt-3">
               <p className="font-display text-sm font-bold text-slate-900">
-                Escalated
+                {t('status.filterEscalated')}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
-                SLA &amp; safety alerts
+                {t('status.slaAlerts')}
               </p>
             </div>
           </button>
@@ -366,14 +368,14 @@ export const StatusDashboardPage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 className="font-display text-base font-bold text-slate-900">
-                  Submitted Reports (Current Session)
+                  {t('home.sessionReportsTitle')}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Every report submitted in this session is recorded below for live status tracking.
+                  {t('status.sessionBannerSub')}
                 </p>
               </div>
               <span className="rounded-full bg-indigo-50 px-2.5 py-1 font-mono text-xs font-bold text-indigo-700 tabular-nums">
-                {sessionSubmittedIssues.length} Submitted
+                {t('status.submittedBadgeCount', {count: sessionSubmittedIssues.length})}
               </span>
             </div>
 
@@ -416,7 +418,7 @@ export const StatusDashboardPage: React.FC = () => {
                           : 'bg-slate-900 text-white hover:bg-slate-800'
                       }`}
                     >
-                      {isTracking ? 'Tracking' : 'Track'}
+                      {isTracking ? t('status.trackingBtn') : t('status.trackBtn')}
                     </button>
                   </div>
                 );
@@ -425,11 +427,11 @@ export const StatusDashboardPage: React.FC = () => {
           </section>
         )}
 
-        {/* Live Status Tracker Card (Themed after Screenshot 1 + Screenshot 2) */}
+        {/* Live Status Tracker Card */}
         {trackedIssue && (
           <section
             ref={trackerRef}
-            aria-label="Active report status tracker"
+            aria-label={t('status.trackerHeading')}
             className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
           >
             <div className="border-b border-slate-100 bg-indigo-50/60 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
@@ -439,17 +441,16 @@ export const StatusDashboardPage: React.FC = () => {
                 </span>
                 {sessionSubmittedIds.includes(trackedIssue.id) && (
                   <span className="rounded-md bg-indigo-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white">
-                    Current Session
+                    {t('status.currentSessionBadge')}
                   </span>
                 )}
               </div>
               <span className="font-mono text-xs text-slate-500">
-                {SEVERITY_CONFIG[trackedIssue.safetySeverity].slaText}
+                {tSevSla(trackedIssue.safetySeverity)}
               </span>
             </div>
 
             <div className="grid lg:grid-cols-12">
-              {/* Left: Screenshot 1 style visual dossier */}
               <div className="p-4 sm:p-5 lg:col-span-5 lg:border-r lg:border-slate-100 space-y-3">
                 <CivicImage
                   src={trackedIssue.photoUrl}
@@ -460,7 +461,7 @@ export const StatusDashboardPage: React.FC = () => {
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
-                      {CATEGORY_MAP[trackedIssue.category].shortLabel}
+                      {tc(trackedIssue.category, true)}
                     </span>
                     <SeverityLabel severity={trackedIssue.safetySeverity} compact />
                   </div>
@@ -476,21 +477,21 @@ export const StatusDashboardPage: React.FC = () => {
                   <span className="inline-flex items-center gap-1 font-medium text-red-600">
                     <ThumbsUp className="h-3.5 w-3.5" />
                     <span className="font-mono tabular-nums">
-                      {trackedIssue.upvotedByUserIds.length} Upvotes
+                      {t('status.upvotesCount', {count: trackedIssue.upvotedByUserIds.length})}
                     </span>
                   </span>
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5 text-slate-400" />
                     <span className="font-mono tabular-nums">
-                      {trackedIssue.mapPosition.distanceKmFromCenter} KMs
+                      {t('status.kmsLabel', {km: trackedIssue.mapPosition.distanceKmFromCenter})}
                     </span>
                   </span>
                   <ResolutionStatusLabel status={trackedIssue.status} />
                 </div>
 
                 <p className="text-xs text-slate-500">
-                  Reported: {formatRelativeTime(trackedIssue.createdAt)} · Routed to{' '}
-                  {trackedIssue.assignedDepartments.join(' + ')}
+                  {t('status.reportedLabel')} {formatRelativeTime(trackedIssue.createdAt)} · {t('status.routedTo')}{' '}
+                  {trackedIssue.assignedDepartments.map((d) => tDept(d)).join(' + ')}
                 </p>
 
                 <div className="pt-1 flex flex-col gap-2">
@@ -501,34 +502,33 @@ export const StatusDashboardPage: React.FC = () => {
                       className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer"
                     >
                       <CheckCircle2 className="h-4 w-4" />
-                      <span>Confirm Issue Resolved (+10 pts)</span>
+                      <span>{t('status.confirmPlus10')}</span>
                     </button>
                   )}
                   <Link
                     to={`/issues/${trackedIssue.id}`}
                     className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
                   >
-                    <span>Open Full Issue Dossier</span>
+                    <span>{t('status.openFullDossier')}</span>
                     <ArrowUpRight className="h-4 w-4" />
                   </Link>
                 </div>
               </div>
 
-              {/* Right: 7-Stage Vertical Status Stepper */}
               <div className="border-t border-slate-100 p-4 sm:p-5 lg:col-span-7 lg:border-t-0 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-display text-base font-bold text-slate-900">
-                    Live 7-Stage Status Tracker
+                    {t('status.trackerHeading')}
                   </h3>
                   <span className="font-mono text-xs font-semibold text-indigo-600 tabular-nums">
-                    Stage{' '}
-                    {Math.max(
-                      1,
-                      COMPLAINT_LIFECYCLE_STAGES.findIndex(
-                        (s) => s.id === trackedIssue.status
-                      ) + 1
-                    )}{' '}
-                    of 7
+                    {t('status.stageOf7', {
+                      stage: Math.max(
+                        1,
+                        COMPLAINT_LIFECYCLE_STAGES.findIndex(
+                          (s) => s.id === trackedIssue.status
+                        ) + 1
+                      ),
+                    })}
                   </span>
                 </div>
 
@@ -540,7 +540,7 @@ export const StatusDashboardPage: React.FC = () => {
                     const reached = idx <= currentIdx;
                     const isCurrent = idx === currentIdx;
                     const recorded = trackedIssue.timeline.find(
-                      (t) => t.stage === stage.id
+                      (tl) => tl.stage === stage.id
                     );
 
                     return (
@@ -563,11 +563,11 @@ export const StatusDashboardPage: React.FC = () => {
                                 reached ? 'text-slate-900' : 'text-slate-400'
                               }`}
                             >
-                              {stage.label}
+                              {ts(stage.id)}
                             </p>
                             {isCurrent && (
                               <span className="rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
-                                Current Stage
+                                {t('status.currentStage')}
                               </span>
                             )}
                           </div>
@@ -585,7 +585,7 @@ export const StatusDashboardPage: React.FC = () => {
                             </>
                           ) : (
                             <p className="mt-0.5 text-[11px] text-slate-400">
-                              {stage.description}
+                              {tsDesc(stage.id)}
                             </p>
                           )}
                         </div>
@@ -624,7 +624,7 @@ export const StatusDashboardPage: React.FC = () => {
           </div>
 
           <p className="font-mono text-xs text-slate-500 tabular-nums">
-            {scopedIssues.length} report{scopedIssues.length === 1 ? '' : 's'} shown
+            {t('status.reportsShown', {count: scopedIssues.length})}
           </p>
         </div>
 
@@ -632,16 +632,16 @@ export const StatusDashboardPage: React.FC = () => {
         {scopedIssues.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
             <p className="text-sm font-semibold text-slate-900">
-              No complaints match this status filter
+              {t('status.emptyTitle')}
             </p>
             <p className="mt-1 text-xs text-slate-600">
-              Switch to &ldquo;All Ward Samples&rdquo; or submit a new civic issue report.
+              {t('status.emptyDesc')}
             </p>
             <Link
               to="/report"
               className="mt-4 inline-flex min-h-10 items-center rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700"
             >
-              Report an Issue
+              {t('home.tileReport')}
             </Link>
           </div>
         ) : (
@@ -671,11 +671,11 @@ export const StatusDashboardPage: React.FC = () => {
                         </span>
                         {isSessionReport && (
                           <span className="rounded-md bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700">
-                            Submitted in Session
+                            {t('status.submittedInSessionBadge')}
                           </span>
                         )}
                         <span className="rounded-md bg-amber-50 px-2 py-0.5 font-medium text-amber-800">
-                          {CATEGORY_MAP[issue.category].shortLabel}
+                          {tc(issue.category, true)}
                         </span>
                         <span className="font-mono tabular-nums text-slate-400">
                           {formatRelativeTime(issue.createdAt)}
@@ -687,9 +687,9 @@ export const StatusDashboardPage: React.FC = () => {
                       </h2>
 
                       <p className="text-xs text-slate-600">
-                        Assigned: {issue.assignedDepartments.join(' + ')} ·{' '}
+                        {t('status.assignedLabel')} {issue.assignedDepartments.map((d) => tDept(d)).join(' + ')} ·{' '}
                         <span className="font-mono">
-                          {SEVERITY_CONFIG[issue.safetySeverity].slaText}
+                          {tSevSla(issue.safetySeverity)}
                         </span>
                       </p>
                     </div>
@@ -718,7 +718,7 @@ export const StatusDashboardPage: React.FC = () => {
                                   : 'text-slate-400'
                               }`}
                             >
-                              {stage.shortLabel}
+                              {ts(stage.id, true)}
                             </p>
                           </div>
                         );
@@ -727,7 +727,7 @@ export const StatusDashboardPage: React.FC = () => {
                     <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-600">
                       <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                       <span>
-                        Latest event (
+                        {t('status.latestEvent')} (
                         {new Date(lastEvent.timestamp).toLocaleString('en-IN')}):{' '}
                         {lastEvent.note}
                       </span>
@@ -750,12 +750,10 @@ export const StatusDashboardPage: React.FC = () => {
                         )}
                         <div>
                           <p className="font-semibold">
-                            {issue.escalation.state === 'escalation_acknowledged'
-                              ? 'Escalation Acknowledged'
-                              : 'Escalation Initiated (Receipt Not Yet Recorded)'}
+                            {tEsc(issue.escalation.state)}
                           </p>
                           <p className="mt-0.5">
-                            Next Authority: {issue.escalation.nextAuthorityLevel} —{' '}
+                            {t('issue.nextAuthority')} {issue.escalation.nextAuthorityLevel} —{' '}
                             {issue.escalation.reason}
                           </p>
                         </div>
@@ -771,7 +769,7 @@ export const StatusDashboardPage: React.FC = () => {
                         className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800 cursor-pointer"
                       >
                         <span>
-                          {isBeingTracked ? 'Viewing in Tracker' : 'Track Status'}
+                          {isBeingTracked ? t('status.viewingInTracker') : t('status.trackStatusBtn')}
                         </span>
                       </button>
 
@@ -782,7 +780,7 @@ export const StatusDashboardPage: React.FC = () => {
                           className="inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white hover:bg-indigo-700 cursor-pointer"
                         >
                           <CheckCircle2 className="h-3.5 w-3.5" />
-                          <span>Confirm Resolution (+10 pts)</span>
+                          <span>{t('status.confirmPlus10')}</span>
                         </button>
                       )}
                     </div>
@@ -791,7 +789,7 @@ export const StatusDashboardPage: React.FC = () => {
                       to={`/issues/${issue.id}`}
                       className="inline-flex min-h-10 items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                     >
-                      <span>View Details</span>
+                      <span>{t('common.viewDetails')}</span>
                       <ArrowUpRight className="h-3.5 w-3.5" />
                     </Link>
                   </div>

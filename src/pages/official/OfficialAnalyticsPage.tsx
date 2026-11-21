@@ -1,16 +1,17 @@
 import React, {useMemo, useState} from 'react';
 import {BarChart3, Filter} from 'lucide-react';
 import {
-  CATEGORY_MAP,
   ISSUE_CATEGORIES,
   MUNICIPAL_DEPARTMENTS,
 } from '../../constants/civicDomain';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 import type {SafetySeverity} from '../../types/civic';
 import {isIssueClosed, isIssueOverdue} from '../../utils/officialHelpers';
 
 export const OfficialAnalyticsPage: React.FC = () => {
   const {currentOfficial, officialJurisdictionIssues, slaConfig} = useCitiSolve();
+  const {t, tc, tSev, tDept} = useTranslation();
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -111,10 +112,10 @@ export const OfficialAnalyticsPage: React.FC = () => {
   const categoryCounts = useMemo(() => {
     return ISSUE_CATEGORIES.map((cat) => ({
       id: cat.id,
-      label: cat.shortLabel,
+      label: tc(cat.id, true),
       count: filteredIssues.filter((i) => i.category === cat.id).length,
     })).filter((c) => c.count > 0);
-  }, [filteredIssues]);
+  }, [filteredIssues, tc]);
 
   const severityCounts = useMemo(() => {
     const order: SafetySeverity[] = ['critical', 'high', 'medium', 'low'];
@@ -181,14 +182,13 @@ export const OfficialAnalyticsPage: React.FC = () => {
     <div className="space-y-6">
       <div>
         <h1 className="font-display text-xl font-bold text-[#0F172A]">
-          Reports &amp; Municipal Analytics
+          {t('offAna.title')}
         </h1>
         <p className="text-xs text-slate-600">
-          Computed from demonstration and session complaints inside{' '}
+          {t('offAna.subtitle')}{' '}
           <span className="font-semibold text-[#0F766E]">
             {currentOfficial?.municipality}
           </span>
-          .
         </p>
       </div>
 
@@ -196,12 +196,12 @@ export const OfficialAnalyticsPage: React.FC = () => {
       <section className="rounded-lg border border-[#E2E8F0] bg-white p-4 space-y-3">
         <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F172A]">
           <Filter className="h-4 w-4 text-[#0F766E]" />
-          <span>Filter Analytics Scope</span>
+          <span>{t('offAna.filterScope')}</span>
         </div>
         <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <label htmlFor="ana-start" className="block text-[11px] text-slate-500 mb-1">
-              From Date
+              {t('offAna.fromDate')}
             </label>
             <input
               id="ana-start"
@@ -213,7 +213,7 @@ export const OfficialAnalyticsPage: React.FC = () => {
           </div>
           <div>
             <label htmlFor="ana-end" className="block text-[11px] text-slate-500 mb-1">
-              To Date
+              {t('offAna.toDate')}
             </label>
             <input
               id="ana-end"
@@ -225,7 +225,7 @@ export const OfficialAnalyticsPage: React.FC = () => {
           </div>
           <div>
             <label htmlFor="ana-ward" className="block text-[11px] text-slate-500 mb-1">
-              Ward
+              {t('offAna.wardFilter')}
             </label>
             <select
               id="ana-ward"
@@ -233,7 +233,7 @@ export const OfficialAnalyticsPage: React.FC = () => {
               onChange={(e) => setWardFilter(e.target.value)}
               className="min-h-9 w-full rounded-md border border-[#E2E8F0] bg-white px-2.5 text-xs"
             >
-              <option value="all">All Authorized Wards</option>
+              <option value="all">{t('offAna.allWards')}</option>
               {(currentOfficial?.authorizedWards ?? []).map((w) => (
                 <option key={w} value={w}>
                   {w}
@@ -243,7 +243,7 @@ export const OfficialAnalyticsPage: React.FC = () => {
           </div>
           <div>
             <label htmlFor="ana-cat" className="block text-[11px] text-slate-500 mb-1">
-              Category
+              {t('offAna.categoryFilter')}
             </label>
             <select
               id="ana-cat"
@@ -251,17 +251,17 @@ export const OfficialAnalyticsPage: React.FC = () => {
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="min-h-9 w-full rounded-md border border-[#E2E8F0] bg-white px-2.5 text-xs"
             >
-              <option value="all">All Categories</option>
+              <option value="all">{t('common.allCategories')}</option>
               {ISSUE_CATEGORIES.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.shortLabel}
+                  {tc(c.id, true)}
                 </option>
               ))}
             </select>
           </div>
           <div>
             <label htmlFor="ana-dept" className="block text-[11px] text-slate-500 mb-1">
-              Department
+              {t('offAna.deptFilter')}
             </label>
             <select
               id="ana-dept"
@@ -269,10 +269,10 @@ export const OfficialAnalyticsPage: React.FC = () => {
               onChange={(e) => setDepartmentFilter(e.target.value)}
               className="min-h-9 w-full rounded-md border border-[#E2E8F0] bg-white px-2.5 text-xs"
             >
-              <option value="all">All Departments</option>
+              <option value="all">{t('offDept.allDepts')}</option>
               {MUNICIPAL_DEPARTMENTS.map((d) => (
                 <option key={d} value={d}>
-                  {d}
+                  {tDept(d)}
                 </option>
               ))}
             </select>
@@ -284,7 +284,7 @@ export const OfficialAnalyticsPage: React.FC = () => {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-4">
           <p className="text-[11px] font-semibold uppercase text-slate-500">
-            Total Filtered
+            {t('offAna.totalFiltered')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-[#0F172A]">
             {metrics.total}
@@ -292,15 +292,15 @@ export const OfficialAnalyticsPage: React.FC = () => {
         </div>
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-4">
           <p className="text-[11px] font-semibold uppercase text-slate-500">
-            Avg Resolution Time
+            {t('offAna.avgResTime')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-[#0F766E]">
-            {metrics.avgResolutionHours !== null ? `${metrics.avgResolutionHours}h` : 'N/A'}
+            {metrics.avgResolutionHours !== null ? `${metrics.avgResolutionHours}${t('common.hours')}` : 'N/A'}
           </p>
         </div>
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-4">
           <p className="text-[11px] font-semibold uppercase text-slate-500">
-            Overdue Percentage
+            {t('offAna.overduePct')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-red-700">
             {metrics.overduePct}%
@@ -308,12 +308,14 @@ export const OfficialAnalyticsPage: React.FC = () => {
         </div>
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-4">
           <p className="text-[11px] font-semibold uppercase text-slate-500">
-            Resolved vs Pending
+            {t('offAna.resolvedVsPending')}
           </p>
           <p className="mt-1 font-mono text-2xl font-bold text-[#0F172A]">
             {metrics.resolvedCount} / {metrics.pendingCount}
           </p>
-          <p className="text-[11px] text-slate-500">{metrics.resolvedPct}% resolved</p>
+          <p className="text-[11px] text-slate-500">
+            {t('offAna.resolvedPctLabel', {pct: metrics.resolvedPct})}
+          </p>
         </div>
       </div>
 
@@ -324,11 +326,11 @@ export const OfficialAnalyticsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-[#0F766E]" />
             <h2 className="font-display text-sm font-bold text-[#0F172A]">
-              Complaints Over Time
+              {t('offAna.complaintsOverTime')}
             </h2>
           </div>
           {overTimeBuckets.length === 0 ? (
-            <p className="text-xs text-slate-500">No complaints match selected filters.</p>
+            <p className="text-xs text-slate-500">{t('common.noMatches')}</p>
           ) : (
             <div className="space-y-2">
               {overTimeBuckets.map(([day, count]) => (
@@ -352,13 +354,13 @@ export const OfficialAnalyticsPage: React.FC = () => {
         {/* Category & Severity Distribution */}
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-4">
           <h2 className="font-display text-sm font-bold text-[#0F172A]">
-            Category &amp; Severity Distribution
+            {t('offAna.catSevDist')}
           </h2>
           <div className="space-y-2">
             {categoryCounts.map((c) => (
               <div key={c.id} className="space-y-1 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-700">{CATEGORY_MAP[c.id].shortLabel}</span>
+                  <span className="text-slate-700">{tc(c.id, true)}</span>
                   <span className="font-mono font-semibold">{c.count}</span>
                 </div>
                 <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
@@ -375,7 +377,7 @@ export const OfficialAnalyticsPage: React.FC = () => {
             {severityCounts.map((s) => (
               <div key={s.sev} className="rounded border border-[#E2E8F0] bg-[#F8FAFC] p-2">
                 <p className="uppercase text-[10px] font-semibold text-slate-500">
-                  {s.sev}
+                  {tSev(s.sev)}
                 </p>
                 <p className="font-mono text-base font-bold text-[#0F172A]">{s.count}</p>
               </div>
@@ -388,16 +390,16 @@ export const OfficialAnalyticsPage: React.FC = () => {
       <div className="grid gap-5 lg:grid-cols-2">
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
           <h2 className="font-display text-sm font-bold text-[#0F172A]">
-            Repeated Issue Locations (Area Clusters)
+            {t('offAna.repeatedLocations')}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] uppercase text-slate-500">
                 <tr>
-                  <th className="px-2.5 py-2">Approximate Area</th>
-                  <th className="px-2.5 py-2">Ward</th>
-                  <th className="px-2.5 py-2">Reports</th>
-                  <th className="px-2.5 py-2">Open</th>
+                  <th className="px-2.5 py-2">{t('offAna.approxArea')}</th>
+                  <th className="px-2.5 py-2">{t('offAna.wardFilter')}</th>
+                  <th className="px-2.5 py-2">{t('offAna.reportsCol')}</th>
+                  <th className="px-2.5 py-2">{t('offDash.colOpen')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E2E8F0]">
@@ -418,22 +420,22 @@ export const OfficialAnalyticsPage: React.FC = () => {
 
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
           <h2 className="font-display text-sm font-bold text-[#0F172A]">
-            Department Performance &amp; Ward Summary
+            {t('offDash.deptPerformance')}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] uppercase text-slate-500">
                 <tr>
-                  <th className="px-2.5 py-2">Department</th>
-                  <th className="px-2.5 py-2">Total</th>
-                  <th className="px-2.5 py-2">Resolved</th>
-                  <th className="px-2.5 py-2">Overdue</th>
+                  <th className="px-2.5 py-2">{t('offDash.colDept')}</th>
+                  <th className="px-2.5 py-2">{t('offDash.colTotal')}</th>
+                  <th className="px-2.5 py-2">{t('offDash.colResolved')}</th>
+                  <th className="px-2.5 py-2">{t('offDash.colOverdue')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E2E8F0]">
                 {departmentPerformance.map((d) => (
                   <tr key={d.dept}>
-                    <td className="px-2.5 py-2 font-medium text-[#0F172A]">{d.dept}</td>
+                    <td className="px-2.5 py-2 font-medium text-[#0F172A]">{tDept(d.dept)}</td>
                     <td className="px-2.5 py-2 font-mono">{d.total}</td>
                     <td className="px-2.5 py-2 font-mono text-emerald-700">{d.resolved}</td>
                     <td className="px-2.5 py-2 font-mono text-red-700">{d.overdue}</td>
@@ -446,7 +448,7 @@ export const OfficialAnalyticsPage: React.FC = () => {
           {wardBreakdown.length > 0 && (
             <div className="border-t border-[#E2E8F0] pt-3 space-y-1.5">
               <p className="text-[11px] font-bold uppercase text-slate-500">
-                Ward Breakdown
+                {t('offAna.wardBreakdown')}
               </p>
               {wardBreakdown.map((w) => (
                 <div
@@ -455,7 +457,7 @@ export const OfficialAnalyticsPage: React.FC = () => {
                 >
                   <span className="font-medium text-[#0F172A]">{w.ward}</span>
                   <span className="font-mono text-slate-600">
-                    {w.resolved} resolved / {w.pending} pending ({w.total} total)
+                    {w.resolved} {t('common.resolved')} / {w.pending} {t('common.pending')} ({w.total})
                   </span>
                 </div>
               ))}

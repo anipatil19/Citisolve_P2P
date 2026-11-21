@@ -7,6 +7,7 @@ import {
 } from '../../components/common/SeverityAndStatus';
 import {CATEGORY_MAP} from '../../constants/civicDomain';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 import {
   getComplaintAgeLabel,
   getIssueDueAt,
@@ -31,21 +32,22 @@ type SortMode = 'safety_sla' | 'deadline_asc' | 'newest' | 'oldest';
 
 const PAGE_SIZE = 6;
 
-const FILTER_TABS: Array<{id: OfficialComplaintFilter; label: string}> = [
-  {id: 'all', label: 'All'},
-  {id: 'new', label: 'New'},
-  {id: 'critical', label: 'Critical'},
-  {id: 'high', label: 'High'},
-  {id: 'unassigned', label: 'Unassigned'},
-  {id: 'assigned', label: 'Assigned'},
-  {id: 'in_progress', label: 'In Progress'},
-  {id: 'overdue', label: 'Overdue'},
-  {id: 'resolved', label: 'Resolved'},
-  {id: 'escalated', label: 'Escalated'},
-];
-
 export const OfficialComplaintsPage: React.FC = () => {
   const {officialJurisdictionIssues, slaConfig} = useCitiSolve();
+  const {t, tc, tDept} = useTranslation();
+
+  const filterTabs: Array<{id: OfficialComplaintFilter; label: string}> = [
+    {id: 'all', label: t('common.all')},
+    {id: 'new', label: t('offComp.filterNew')},
+    {id: 'critical', label: t('sev.critical')},
+    {id: 'high', label: t('sev.high')},
+    {id: 'unassigned', label: t('offComp.filterUnassigned')},
+    {id: 'assigned', label: t('offComp.filterAssigned')},
+    {id: 'in_progress', label: t('offComp.filterInProgress')},
+    {id: 'overdue', label: t('offComp.filterOverdue')},
+    {id: 'resolved', label: t('common.resolved')},
+    {id: 'escalated', label: t('offComp.filterEscalated')},
+  ];
 
   const [filter, setFilter] = useState<OfficialComplaintFilter>('all');
   const [sortMode, setSortMode] = useState<SortMode>('safety_sla');
@@ -132,14 +134,14 @@ export const OfficialComplaintsPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-[#0F172A] sm:text-2xl">
-            Complaint Management
+            {t('offComp.title')}
           </h1>
           <p className="mt-0.5 text-xs text-slate-600">
-            Jurisdiction-scoped queue ranked by safety severity, urgency, and configured SLA deadline.
+            {t('offComp.subtitle')}
           </p>
         </div>
         <span className="font-mono text-xs text-slate-500 tabular-nums">
-          {filteredAndSorted.length} matching complaints
+          {t('offComp.matchingCount', {count: filteredAndSorted.length})}
         </span>
       </div>
 
@@ -155,7 +157,7 @@ export const OfficialComplaintsPage: React.FC = () => {
                 setSearchQuery(e.target.value);
                 setPage(1);
               }}
-              placeholder="Search ID, ward, location, category, or department..."
+              placeholder={t('offComp.searchPlaceholder')}
               className="min-h-10 w-full rounded-md border border-[#E2E8F0] bg-white pl-9 pr-3 text-xs text-[#0F172A]"
             />
           </div>
@@ -165,7 +167,7 @@ export const OfficialComplaintsPage: React.FC = () => {
               htmlFor="official-sort"
               className="text-xs font-semibold text-slate-600 whitespace-nowrap"
             >
-              Sort by:
+              {t('offComp.sortBy')}
             </label>
             <select
               id="official-sort"
@@ -176,16 +178,16 @@ export const OfficialComplaintsPage: React.FC = () => {
               }}
               className="min-h-10 rounded-md border border-[#E2E8F0] bg-white px-3 text-xs font-medium text-[#0F172A]"
             >
-              <option value="safety_sla">Safety Severity &amp; SLA Deadline</option>
-              <option value="deadline_asc">Urgency / Earliest SLA Due</option>
-              <option value="newest">Submission Date (Newest)</option>
-              <option value="oldest">Age of Complaint (Oldest)</option>
+              <option value="safety_sla">{t('offComp.sortSafetySla')}</option>
+              <option value="deadline_asc">{t('offComp.sortDeadline')}</option>
+              <option value="newest">{t('offComp.sortNewest')}</option>
+              <option value="oldest">{t('offComp.sortOldest')}</option>
             </select>
           </div>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          {FILTER_TABS.map((tab) => (
+          {filterTabs.map((tab) => (
             <button
               key={tab.id}
               type="button"
@@ -211,24 +213,24 @@ export const OfficialComplaintsPage: React.FC = () => {
           <table className="w-full min-w-[980px] text-left text-xs">
             <thead className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-slate-600">
               <tr>
-                <th className="px-3.5 py-3 font-semibold">Complaint ID</th>
-                <th className="px-3.5 py-3 font-semibold">Category</th>
-                <th className="px-3.5 py-3 font-semibold">Short Description</th>
-                <th className="px-3.5 py-3 font-semibold">Severity</th>
-                <th className="px-3.5 py-3 font-semibold">Current Status</th>
-                <th className="px-3.5 py-3 font-semibold">Ward &amp; Approx. Location</th>
-                <th className="px-3.5 py-3 font-semibold">Assigned Dept</th>
-                <th className="px-3.5 py-3 font-semibold">Submitted</th>
-                <th className="px-3.5 py-3 font-semibold">Age</th>
-                <th className="px-3.5 py-3 font-semibold">Upvotes</th>
-                <th className="px-3.5 py-3 font-semibold text-right">Action</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colId')}</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colCategory')}</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colDesc')}</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colSeverity')}</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colStatus')}</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colLocation')}</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colDept')}</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colSubmitted')}</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colAge')}</th>
+                <th className="px-3.5 py-3 font-semibold">{t('offComp.colUpvotes')}</th>
+                <th className="px-3.5 py-3 font-semibold text-right">{t('offComp.colAction')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">
               {paginatedIssues.length === 0 ? (
                 <tr>
                   <td colSpan={11} className="px-4 py-10 text-center text-slate-500">
-                    No complaints match this filter in your authorized jurisdiction.
+                    {t('common.noMatches')}
                   </td>
                 </tr>
               ) : (
@@ -240,12 +242,12 @@ export const OfficialComplaintsPage: React.FC = () => {
                         <div>{issue.id}</div>
                         {overdue && (
                           <span className="text-[10px] font-bold text-red-700">
-                            OVERDUE
+                            {t('offDash.overdueTag')}
                           </span>
                         )}
                       </td>
                       <td className="px-3.5 py-3 whitespace-nowrap text-slate-700">
-                        {CATEGORY_MAP[issue.category].shortLabel}
+                        {tc(issue.category, true)}
                       </td>
                       <td className="px-3.5 py-3 max-w-xs">
                         <p className="font-semibold text-[#0F172A] line-clamp-1">
@@ -271,7 +273,7 @@ export const OfficialComplaintsPage: React.FC = () => {
                       </td>
                       <td className="px-3.5 py-3 max-w-[160px] text-slate-700">
                         <p className="truncate">
-                          {issue.assignedDepartments.join(', ') || 'Unassigned'}
+                          {issue.assignedDepartments.map((d) => tDept(d)).join(', ') || t('offDetail.unassigned')}
                         </p>
                         {issue.assignedStaffName && (
                           <p className="text-[11px] text-[#0F766E] truncate">
@@ -293,7 +295,7 @@ export const OfficialComplaintsPage: React.FC = () => {
                           to={`/official/complaints/${issue.id}`}
                           className="inline-flex items-center gap-1 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-2.5 py-1.5 text-xs font-semibold text-[#0F766E] hover:bg-teal-50"
                         >
-                          <span>Manage</span>
+                          <span>{t('offComp.manageBtn')}</span>
                           <ArrowUpRight className="h-3.5 w-3.5" />
                         </Link>
                       </td>
@@ -308,7 +310,7 @@ export const OfficialComplaintsPage: React.FC = () => {
         {/* Pagination */}
         <div className="flex items-center justify-between border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-2.5 text-xs text-slate-600">
           <span className="font-mono tabular-nums">
-            Page {safePage} of {totalPages}
+            {t('offComp.pageOf', {page: safePage, total: totalPages})}
           </span>
           <div className="flex items-center gap-1.5">
             <button
@@ -318,7 +320,7 @@ export const OfficialComplaintsPage: React.FC = () => {
               className="inline-flex h-8 items-center gap-1 rounded border border-[#E2E8F0] bg-white px-2.5 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 cursor-pointer"
             >
               <ChevronLeft className="h-3.5 w-3.5" />
-              <span>Prev</span>
+              <span>{t('offComp.prevBtn')}</span>
             </button>
             <button
               type="button"
@@ -326,7 +328,7 @@ export const OfficialComplaintsPage: React.FC = () => {
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               className="inline-flex h-8 items-center gap-1 rounded border border-[#E2E8F0] bg-white px-2.5 font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40 cursor-pointer"
             >
-              <span>Next</span>
+              <span>{t('offComp.nextBtn')}</span>
               <ChevronRight className="h-3.5 w-3.5" />
             </button>
           </div>

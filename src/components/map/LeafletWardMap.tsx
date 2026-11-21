@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import {SUPPORTED_LANGUAGES} from '../../constants/civicDomain';
 import {useCitiSolve} from '../../context/CitiSolveContext';
-import type {CivicIssue, SafetySeverity, SupportedLanguageCode} from '../../types/civic';
+import {useTranslation} from '../../i18n/useTranslation';
+import type {CivicIssue, SafetySeverity} from '../../types/civic';
 
 interface LeafletWardMapProps {
   issues: CivicIssue[];
@@ -74,7 +75,8 @@ export const LeafletWardMap: React.FC<LeafletWardMapProps> = ({
   radiusKm,
   onChangeRadiusKm,
 }) => {
-  const {currentUser, updateProfile, requestLiveLocationAccess} = useCitiSolve();
+  const {currentUser, requestLiveLocationAccess} = useCitiSolve();
+  const {lang: currentLang, setLang, t} = useTranslation();
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -270,9 +272,9 @@ export const LeafletWardMap: React.FC<LeafletWardMapProps> = ({
             className="inline-flex rounded-xl border border-slate-200 bg-white p-0.5 text-xs"
           >
             {[
-              {km: 2, label: '2 km'},
-              {km: 5, label: '5 km'},
-              {km: 15, label: 'All'},
+              {km: 2, label: t('map.radius2km')},
+              {km: 5, label: t('map.radius5km')},
+              {km: 15, label: t('map.radiusAll')},
             ].map((opt) => (
               <button
                 key={opt.km}
@@ -300,7 +302,7 @@ export const LeafletWardMap: React.FC<LeafletWardMapProps> = ({
             }`}
           >
             <Layers className="h-3.5 w-3.5" />
-            <span>Cluster</span>
+            <span>{t('map.cluster')}</span>
           </button>
         </div>
 
@@ -315,7 +317,7 @@ export const LeafletWardMap: React.FC<LeafletWardMapProps> = ({
           ) : (
             <LocateFixed className="h-3.5 w-3.5" />
           )}
-          <span>{mapCenter.isLive ? 'Update GPS' : 'Use My Location'}</span>
+          <span>{mapCenter.isLive ? t('map.updateGps') : t('map.useMyLocation')}</span>
         </button>
       </div>
 
@@ -332,7 +334,7 @@ export const LeafletWardMap: React.FC<LeafletWardMapProps> = ({
           <div className="relative">
             <button
               type="button"
-              aria-label="Select preferred language"
+              aria-label={t('common.selectLanguage')}
               onClick={() => setLangMenuOpen((o) => !o)}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md backdrop-blur-xs hover:bg-white cursor-pointer"
             >
@@ -340,23 +342,23 @@ export const LeafletWardMap: React.FC<LeafletWardMapProps> = ({
             </button>
 
             {langMenuOpen && (
-              <div className="absolute right-0 mt-2 w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
-                {SUPPORTED_LANGUAGES.map((lang) => (
+              <div className="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg">
+                {SUPPORTED_LANGUAGES.map((item) => (
                   <button
-                    key={lang.code}
+                    key={item.code}
                     type="button"
                     onClick={() => {
-                      updateProfile({preferredLanguage: lang.code});
+                      setLang(item.code);
                       setLangMenuOpen(false);
                     }}
                     className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium cursor-pointer ${
-                      currentUser?.preferredLanguage === lang.code
+                      currentLang === item.code
                         ? 'bg-indigo-50 text-indigo-700'
                         : 'text-slate-700 hover:bg-slate-50'
                     }`}
                   >
-                    <span>{lang.name}</span>
-                    <span>{lang.nativeLabel}</span>
+                    <span>{item.name}</span>
+                    <span>{item.nativeLabel}</span>
                   </button>
                 ))}
               </div>
@@ -365,7 +367,7 @@ export const LeafletWardMap: React.FC<LeafletWardMapProps> = ({
 
           <Link
             to="/profile"
-            aria-label="Open citizen profile"
+            aria-label={t('nav.profile')}
             className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-indigo-600 font-display text-sm font-bold text-white shadow-md"
           >
             {(currentUser?.name ?? 'C').charAt(0).toUpperCase()}
@@ -377,19 +379,21 @@ export const LeafletWardMap: React.FC<LeafletWardMapProps> = ({
         <div className="flex flex-wrap items-center gap-3">
           <span className="inline-flex items-center gap-1 font-medium">
             <span className="h-2.5 w-2.5 rounded-full bg-red-600" aria-hidden="true" />
-            Critical
+            {t('map.legendCritical')}
           </span>
           <span className="inline-flex items-center gap-1 font-medium">
             <span className="h-2.5 w-2.5 rounded-full bg-orange-600" aria-hidden="true" />
-            High/Med
+            {t('map.legendHighMed')}
           </span>
           <span className="inline-flex items-center gap-1 font-medium">
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-600" aria-hidden="true" />
-            Low/Resolved
+            {t('map.legendLowResolved')}
           </span>
         </div>
         <span className="text-slate-500">
-          OpenStreetMap + Leaflet · Sample nearby pins around {mapCenter.isLive ? 'your GPS' : 'Bengaluru'}
+          {t('map.osmCitizenFooter', {
+            place: mapCenter.isLive ? t('map.yourGps') : t('map.bengaluru'),
+          })}
         </span>
       </div>
     </div>

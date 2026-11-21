@@ -1,5 +1,6 @@
 import React from 'react';
 import {Check} from 'lucide-react';
+import {useTranslation} from '../../i18n/useTranslation';
 
 interface SolvedSuccessModalProps {
   open: boolean;
@@ -18,6 +19,7 @@ export const SolvedSuccessModal: React.FC<SolvedSuccessModalProps> = ({
   onClose,
   onViewSolved,
 }) => {
+  const {t, tDept} = useTranslation();
   if (!open) return null;
 
   return (
@@ -36,7 +38,7 @@ export const SolvedSuccessModal: React.FC<SolvedSuccessModalProps> = ({
         </div>
 
         <h2 className="mt-5 font-display text-2xl font-bold tracking-tight">
-          Issue Marked as Solved
+          {t('solvedModal.title')}
         </h2>
 
         <p className="mt-1.5 font-mono text-xs font-semibold text-emerald-100">
@@ -49,10 +51,10 @@ export const SolvedSuccessModal: React.FC<SolvedSuccessModalProps> = ({
 
         <div className="mt-4 rounded-2xl bg-white/15 px-4 py-3 text-xs text-emerald-50 space-y-1">
           <p className="font-semibold text-white">
-            Dept: {departments.join(' + ')}
+            {t('solvedModal.department')}: {departments.map((d) => tDept(d)).join(' + ')}
           </p>
           <p>
-            Solved status is now live on Citizen and Municipal Officer dashboards.
+            {t('solvedModal.subtitle')}
           </p>
         </div>
 
@@ -63,7 +65,7 @@ export const SolvedSuccessModal: React.FC<SolvedSuccessModalProps> = ({
               onClick={onViewSolved}
               className="min-h-11 w-full rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-[#0B8043] shadow-sm hover:bg-emerald-50 cursor-pointer"
             >
-              View Solved Complaints
+              {t('solvedModal.viewSolvedBtn')}
             </button>
           )}
           <button
@@ -71,7 +73,7 @@ export const SolvedSuccessModal: React.FC<SolvedSuccessModalProps> = ({
             onClick={onClose}
             className="min-h-10 w-full rounded-xl border border-white/30 bg-transparent px-4 py-2 text-xs font-semibold text-white hover:bg-white/10 cursor-pointer"
           >
-            Done
+            {t('solvedModal.doneBtn')}
           </button>
         </div>
       </div>

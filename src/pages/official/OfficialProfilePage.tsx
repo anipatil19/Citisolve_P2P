@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import {useCitiSolve} from '../../context/CitiSolveContext';
 import {DEMO_OFFICIAL_ACCOUNTS} from '../../data/officialDemoData';
+import {useTranslation} from '../../i18n/useTranslation';
 
 export const OfficialProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export const OfficialProfilePage: React.FC = () => {
     logoutOfficial,
     resetDemoWorkspace,
   } = useCitiSolve();
+  const {t, tRole, tDept} = useTranslation();
 
   const [guardResult, setGuardResult] = useState<string | null>(null);
   const [guardLoading, setGuardLoading] = useState(false);
@@ -66,10 +68,10 @@ export const OfficialProfilePage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-[#0F172A]">
-            Official Profile &amp; Audit Settings
+            {t('offProf.title')}
           </h1>
           <p className="text-xs text-slate-600">
-            Authorized jurisdiction credentials, backend access check, audit history, and demonstration controls.
+            {t('offProf.subtitle')}
           </p>
         </div>
 
@@ -82,7 +84,7 @@ export const OfficialProfilePage: React.FC = () => {
           className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-3.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
         >
           <LogOut className="h-3.5 w-3.5" />
-          <span>Sign Out</span>
+          <span>{t('common.signOut')}</span>
         </button>
       </div>
 
@@ -93,57 +95,57 @@ export const OfficialProfilePage: React.FC = () => {
             <div className="flex items-center gap-2">
               <UserCog className="h-4 w-4 text-[#0F766E]" />
               <h2 className="font-display text-base font-bold text-[#0F172A]">
-                Official Credentials
+                {t('offProf.credentialsTitle')}
               </h2>
             </div>
             <span className="rounded border border-teal-200 bg-teal-50 px-2 py-0.5 text-[11px] font-semibold text-[#0F766E]">
-              Demo Official Session
+              {t('offProf.demoSessionTag')}
             </span>
           </div>
 
           <dl className="grid gap-3 text-xs sm:grid-cols-2">
             <div>
-              <dt className="text-slate-500">Officer Name</dt>
+              <dt className="text-slate-500">{t('offProf.officerName')}</dt>
               <dd className="font-semibold text-[#0F172A]">{currentOfficial.name}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Employee ID</dt>
+              <dt className="text-slate-500">{t('offProf.employeeId')}</dt>
               <dd className="font-mono font-semibold text-[#0F172A]">
                 {currentOfficial.employeeId}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500">Official Email</dt>
+              <dt className="text-slate-500">{t('offProf.officialEmail')}</dt>
               <dd className="font-medium text-[#0F172A]">
                 {currentOfficial.officialEmail}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500">Designation</dt>
+              <dt className="text-slate-500">{t('offProf.designation')}</dt>
               <dd className="font-medium text-[#0F172A]">
                 {currentOfficial.designation}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500">Role Level</dt>
+              <dt className="text-slate-500">{t('offProf.roleLevel')}</dt>
               <dd className="font-mono uppercase text-[#0F766E]">
-                {currentOfficial.roleLevel.replace('_', ' ')}
+                {tRole(currentOfficial.roleLevel)}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500">Municipality</dt>
+              <dt className="text-slate-500">{t('offProf.municipality')}</dt>
               <dd className="font-medium text-[#0F172A]">
                 {currentOfficial.municipality}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500">Department Scope</dt>
+              <dt className="text-slate-500">{t('offProf.department')}</dt>
               <dd className="font-medium text-[#0F172A]">
-                {currentOfficial.department}
+                {tDept(currentOfficial.department)}
               </dd>
             </div>
             <div>
-              <dt className="text-slate-500">Authorized Wards</dt>
+              <dt className="text-slate-500">{t('offProf.wards')}</dt>
               <dd className="font-medium text-[#0F172A]">
                 {currentOfficial.authorizedWards.join(', ')}
               </dd>
@@ -160,8 +162,8 @@ export const OfficialProfilePage: React.FC = () => {
               <ShieldCheck className="h-4 w-4" />
               <span>
                 {guardLoading
-                  ? 'Checking Backend Role Guard...'
-                  : 'Verify Server-Side Role & Jurisdiction Guard'}
+                  ? t('common.loading')
+                  : t('offProf.serverCheckBtn')}
               </span>
             </button>
             {guardResult && (
@@ -176,10 +178,10 @@ export const OfficialProfilePage: React.FC = () => {
         {/* Demo Account Switcher & Reset */}
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-4 lg:col-span-6">
           <h2 className="font-display text-base font-bold text-[#0F172A]">
-            Switch Demonstration Official Role
+            {t('offProf.switchRoleTitle')}
           </h2>
           <p className="text-xs text-slate-600">
-            Switch between Municipal Officer and Ward Officer demonstration accounts.
+            {t('offProf.switchRoleDesc')}
           </p>
 
           <div className="space-y-2">
@@ -206,11 +208,11 @@ export const OfficialProfilePage: React.FC = () => {
                       </span>
                     </p>
                     <p className="text-slate-600">
-                      {acc.designation} · {acc.authorizedWards.join(', ')}
+                      {tRole(acc.roleLevel)} · {acc.authorizedWards.join(', ')}
                     </p>
                   </div>
                   {active && (
-                    <span className="font-semibold text-[#0F766E]">Active</span>
+                    <span className="font-semibold text-[#0F766E]">{t('common.active')}</span>
                   )}
                 </button>
               );
@@ -227,7 +229,7 @@ export const OfficialProfilePage: React.FC = () => {
               className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              <span>Reset All Demonstration Data</span>
+              <span>{t('offProf.resetAllBtn')}</span>
             </button>
           </div>
         </section>
@@ -236,17 +238,17 @@ export const OfficialProfilePage: React.FC = () => {
       {/* Audit Log */}
       <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
         <h2 className="font-display text-base font-bold text-[#0F172A]">
-          Official Action &amp; Override Audit Log ({officialAuditLog.length})
+          {t('offProf.auditLogTitle', {count: officialAuditLog.length})}
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="border-b border-[#E2E8F0] bg-[#F8FAFC] text-[11px] uppercase text-slate-500">
               <tr>
-                <th className="px-3 py-2">Timestamp</th>
-                <th className="px-3 py-2">Action</th>
-                <th className="px-3 py-2">Complaint</th>
-                <th className="px-3 py-2">Official</th>
-                <th className="px-3 py-2">Details</th>
+                <th className="px-3 py-2">{t('offProf.colTimestamp')}</th>
+                <th className="px-3 py-2">{t('offProf.colAction')}</th>
+                <th className="px-3 py-2">{t('solvedModal.complaintId')}</th>
+                <th className="px-3 py-2">{t('common.official')}</th>
+                <th className="px-3 py-2">{t('offProf.colDetails')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E2E8F0]">

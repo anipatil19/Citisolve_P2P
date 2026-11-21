@@ -13,13 +13,15 @@ import {
   ThumbsUp,
 } from 'lucide-react';
 import {CivicImage} from '../components/common/CivicImage';
+import {LanguageSelector} from '../components/common/LanguageSelector';
 import {
   ResolutionStatusLabel,
   SeverityLabel,
 } from '../components/common/SeverityAndStatus';
 import {LeafletWardMap} from '../components/map/LeafletWardMap';
-import {CATEGORY_MAP, ISSUE_CATEGORIES} from '../constants/civicDomain';
+import {ISSUE_CATEGORIES} from '../constants/civicDomain';
 import {useCitiSolve} from '../context/CitiSolveContext';
+import {useTranslation} from '../i18n/useTranslation';
 import type {IssueCategoryId, SafetySeverity} from '../types/civic';
 
 function formatRelativeDays(isoDate: string): string {
@@ -44,6 +46,7 @@ export const CitizenHomePage: React.FC = () => {
     requestCameraAccess,
   } = useCitiSolve();
   const navigate = useNavigate();
+  const {t, tc} = useTranslation();
 
   const [categoryFilter, setCategoryFilter] = useState<'all' | IssueCategoryId>('all');
   const [severityFilter, setSeverityFilter] = useState<'all' | SafetySeverity>('all');
@@ -138,7 +141,7 @@ export const CitizenHomePage: React.FC = () => {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-              Hi {firstName}!
+              {t('home.greeting', {name: firstName})}
             </h1>
             <p className="mt-1 flex items-center gap-1.5 text-xs font-medium text-indigo-100 sm:text-sm">
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -149,9 +152,13 @@ export const CitizenHomePage: React.FC = () => {
           </div>
 
           <div className="relative flex items-center gap-2 shrink-0">
+            <div className="lg:hidden">
+              <LanguageSelector variant="indigo" compact />
+            </div>
+
             <button
               type="button"
-              aria-label={`Open alerts (${unreadNotificationsCount} unread)`}
+              aria-label={`${t('nav.notifications')} (${unreadNotificationsCount})`}
               onClick={() => setAlertsOpen((o) => !o)}
               className="relative flex min-h-11 min-w-11 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/25 cursor-pointer"
             >
@@ -165,7 +172,7 @@ export const CitizenHomePage: React.FC = () => {
 
             <Link
               to="/profile"
-              aria-label="Open profile settings"
+              aria-label={t('nav.profile')}
               className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-white/60 bg-indigo-500 font-display text-sm font-bold text-white lg:hidden"
             >
               {firstName.charAt(0).toUpperCase()}
@@ -174,12 +181,12 @@ export const CitizenHomePage: React.FC = () => {
             {alertsOpen && (
               <div
                 role="dialog"
-                aria-label="Alerts and notifications"
+                aria-label={t('nav.notifications')}
                 className="absolute right-0 top-12 z-50 w-80 rounded-2xl border border-slate-200 bg-white p-4 text-slate-900 shadow-xl"
               >
                 <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                   <span className="font-display text-sm font-semibold">
-                    Alerts &amp; Updates
+                    {t('nav.notifications')}
                   </span>
                   {unreadNotificationsCount > 0 && (
                     <button
@@ -188,7 +195,7 @@ export const CitizenHomePage: React.FC = () => {
                       className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 cursor-pointer"
                     >
                       <Check className="h-3.5 w-3.5" />
-                      Mark read
+                      {t('nav.markAllRead')}
                     </button>
                   )}
                 </div>
@@ -233,10 +240,10 @@ export const CitizenHomePage: React.FC = () => {
             </div>
             <div className="mt-3">
               <p className="font-display text-sm font-bold text-slate-900">
-                Report Issue
+                {t('home.tileReport')}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
-                Raise civic problems
+                {t('home.tileReportSub')}
               </p>
             </div>
           </Link>
@@ -251,10 +258,10 @@ export const CitizenHomePage: React.FC = () => {
             </div>
             <div className="mt-3">
               <p className="font-display text-sm font-bold text-slate-900">
-                Issues near me
+                {t('home.tileNearby')}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
-                Check local problems
+                {t('home.tileNearbySub')}
               </p>
             </div>
           </button>
@@ -269,18 +276,16 @@ export const CitizenHomePage: React.FC = () => {
               </div>
               {sessionSubmittedIssues.length > 0 && (
                 <span className="rounded-full bg-indigo-50 px-2 py-0.5 font-mono text-[11px] font-bold text-indigo-700 tabular-nums">
-                  {sessionSubmittedIssues.length} new
+                  {sessionSubmittedIssues.length}
                 </span>
               )}
             </div>
             <div className="mt-3">
               <p className="font-display text-sm font-bold text-slate-900">
-                My Complaints
+                {t('home.tileMyComplaints')}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
-                {sessionSubmittedIssues.length > 0
-                  ? `${sessionSubmittedIssues.length} submitted in session`
-                  : 'Track your reports'}
+                {t('home.tileMyComplaintsSub')}
               </p>
             </div>
           </Link>
@@ -294,10 +299,10 @@ export const CitizenHomePage: React.FC = () => {
             </div>
             <div className="mt-3">
               <p className="font-display text-sm font-bold text-slate-900">
-                Alerts &amp; News
+                {t('home.tileAlerts')}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
-                Stay updated
+                {t('home.tileAlertsSub')}
               </p>
             </div>
           </Link>
@@ -311,17 +316,17 @@ export const CitizenHomePage: React.FC = () => {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <h2 className="font-display text-sm font-bold text-slate-900">
-                  Submitted in Current Session ({sessionSubmittedIssues.length})
+                  {t('home.sessionReportsTitle')} ({sessionSubmittedIssues.length})
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Tap any report below to track its 7-stage municipal status
+                  {t('home.sessionReportsSub')}
                 </p>
               </div>
               <Link
                 to="/status?filter=submitted"
                 className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 whitespace-nowrap"
               >
-                View all &gt;
+                {t('common.viewAll')} &gt;
               </Link>
             </div>
 
@@ -353,7 +358,7 @@ export const CitizenHomePage: React.FC = () => {
                     to={`/status?track=${sub.id}`}
                     className="inline-flex min-h-10 items-center justify-center rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-semibold text-white hover:bg-slate-800 whitespace-nowrap"
                   >
-                    Track Status
+                    {t('report.trackStatusBtn')}
                   </Link>
                 </div>
               ))}
@@ -367,10 +372,10 @@ export const CitizenHomePage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="font-display text-sm font-semibold text-slate-900">
-                  Enable Live Location &amp; Camera Permissions
+                  {t('profile.permissionsSection')}
                 </p>
                 <p className="mt-0.5 text-xs text-slate-600">
-                  Allow GPS to center OpenStreetMap pins near you and camera access for instant street reporting.
+                  {t('home.enableLocationPrompt')}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -389,7 +394,7 @@ export const CitizenHomePage: React.FC = () => {
                     <Navigation className="h-3.5 w-3.5" />
                   )}
                   <span>
-                    {!needsLocationPerm ? 'Location Enabled' : 'Enable Location'}
+                    {!needsLocationPerm ? t('auth.gpsEnabled') : t('home.enableGpsBtn')}
                   </span>
                 </button>
 
@@ -408,7 +413,7 @@ export const CitizenHomePage: React.FC = () => {
                     <Camera className="h-3.5 w-3.5" />
                   )}
                   <span>
-                    {!needsCameraPerm ? 'Camera Enabled' : 'Enable Camera'}
+                    {!needsCameraPerm ? t('auth.cameraEnabled') : t('home.enableCamBtn')}
                   </span>
                 </button>
               </div>
@@ -435,43 +440,40 @@ export const CitizenHomePage: React.FC = () => {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h2 className="font-display text-lg font-bold text-slate-900">
-                Nearby Issue Pins
+                {t('home.mapSectionTitle')}
               </h2>
-              <p className="text-xs text-slate-500">
-                Tap any OpenStreetMap pin to inspect &amp; upvote · Severity and resolution status stay separate
-              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
               <select
-                aria-label="Filter by category"
+                aria-label={t('home.filterAllCategories')}
                 value={categoryFilter}
                 onChange={(e) =>
                   setCategoryFilter(e.target.value as 'all' | IssueCategoryId)
                 }
                 className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800"
               >
-                <option value="all">All 8 Categories</option>
+                <option value="all">{t('home.filterAllCategories')}</option>
                 {ISSUE_CATEGORIES.map((cat) => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.shortLabel}
+                    {tc(cat.id, true)}
                   </option>
                 ))}
               </select>
 
               <select
-                aria-label="Filter by severity"
+                aria-label={t('home.filterAllSeverities')}
                 value={severityFilter}
                 onChange={(e) =>
                   setSeverityFilter(e.target.value as 'all' | SafetySeverity)
                 }
                 className="min-h-10 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-800"
               >
-                <option value="all">All Severities</option>
-                <option value="critical">Critical</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
+                <option value="all">{t('home.filterAllSeverities')}</option>
+                <option value="critical">{t('sev.critical')}</option>
+                <option value="high">{t('sev.high')}</option>
+                <option value="medium">{t('sev.medium')}</option>
+                <option value="low">{t('sev.low')}</option>
               </select>
             </div>
           </div>
@@ -486,7 +488,6 @@ export const CitizenHomePage: React.FC = () => {
                 onChangeRadiusKm={setRadiusKm}
               />
 
-              {/* Highlighted Bottom Sheet / Card directly under Map (Screenshot 1 Pattern) */}
               {prioritizedIssue && (
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
@@ -505,21 +506,23 @@ export const CitizenHomePage: React.FC = () => {
                     <span className="inline-flex items-center gap-1 font-medium text-red-600">
                       <ThumbsUp className="h-3.5 w-3.5" />
                       <span className="font-mono tabular-nums">
-                        {prioritizedIssue.upvotedByUserIds.length} Upvotes
+                        {prioritizedIssue.upvotedByUserIds.length} {t('common.upvotes')}
                       </span>
                     </span>
                     <span className="inline-flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5 text-slate-400" />
                       <span className="font-mono tabular-nums">
-                        {prioritizedIssue.mapPosition.distanceKmFromCenter} KMs
+                        {t('common.kmAway', {
+                          km: prioritizedIssue.mapPosition.distanceKmFromCenter,
+                        })}
                       </span>
                     </span>
                     <ResolutionStatusLabel status={prioritizedIssue.status} />
                   </div>
 
                   <p className="text-xs text-slate-500">
-                    Reported: {formatRelativeDays(prioritizedIssue.createdAt)} ·{' '}
-                    {CATEGORY_MAP[prioritizedIssue.category].label}
+                    {formatRelativeDays(prioritizedIssue.createdAt)} ·{' '}
+                    {tc(prioritizedIssue.category)}
                   </p>
 
                   <div className="flex flex-col gap-2 sm:flex-row">
@@ -537,8 +540,8 @@ export const CitizenHomePage: React.FC = () => {
                       <span>
                         {currentUser &&
                         prioritizedIssue.upvotedByUserIds.includes(currentUser.id)
-                          ? 'Upvoted (Tap to Remove)'
-                          : 'Upvote'}
+                          ? t('common.upvoted')
+                          : t('common.upvote')}
                       </span>
                     </button>
 
@@ -546,7 +549,7 @@ export const CitizenHomePage: React.FC = () => {
                       to={`/issues/${prioritizedIssue.id}`}
                       className="flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-100 whitespace-nowrap"
                     >
-                      <span>View Details</span>
+                      <span>{t('common.viewDetails')}</span>
                       <ArrowUpRight className="h-4 w-4" />
                     </Link>
                   </div>
@@ -554,24 +557,23 @@ export const CitizenHomePage: React.FC = () => {
               )}
             </div>
 
-            {/* "Near you" Feed Section (Matches Reference Screenshot 2) */}
             <div className="lg:col-span-5 space-y-3">
               <div className="flex items-center justify-between">
                 <h2 className="font-display text-lg font-bold text-slate-900">
-                  Near you
+                  {t('home.nearYouTitle')}
                 </h2>
                 <Link
                   to="/history"
                   className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                 >
-                  View all &gt;
+                  {t('common.viewAll')} &gt;
                 </Link>
               </div>
 
               <div className="space-y-3">
                 {filteredIssues.length === 0 ? (
                   <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-xs text-slate-600">
-                    No active complaints recorded for this filter. An empty view does not guarantee zero on-ground issues.
+                    {t('common.noMatches')}
                   </div>
                 ) : (
                   filteredIssues.slice(0, 5).map((item) => {
@@ -590,7 +592,7 @@ export const CitizenHomePage: React.FC = () => {
                             </p>
                             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                               <span className="rounded-md bg-amber-50 px-2 py-0.5 font-medium text-amber-800">
-                                {CATEGORY_MAP[item.category].shortLabel}
+                                {tc(item.category, true)}
                               </span>
                               <SeverityLabel severity={item.safetySeverity} compact />
                               <ResolutionStatusLabel status={item.status} />
@@ -631,14 +633,14 @@ export const CitizenHomePage: React.FC = () => {
                             <span className="font-mono tabular-nums">
                               {item.upvotedByUserIds.length}
                             </span>
-                            <span>{hasVoted ? 'Supported' : 'Upvote'}</span>
+                            <span>{hasVoted ? t('common.upvoted') : t('common.upvote')}</span>
                           </button>
 
                           <Link
                             to={`/issues/${item.id}`}
                             className="inline-flex min-h-10 items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                           >
-                            <span>View Details</span>
+                            <span>{t('common.viewDetails')}</span>
                             <ArrowUpRight className="h-3.5 w-3.5" />
                           </Link>
                         </div>
@@ -651,41 +653,37 @@ export const CitizenHomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* Compact Community Summary Strip */}
         <section
-          aria-label="Community summary (sample demonstration data)"
+          aria-label={t('home.summaryTitle')}
           className="rounded-2xl border border-slate-200 bg-white p-4"
         >
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-sm font-bold text-slate-900">
-              Community Summary
+              {t('home.summaryTitle')}
             </h2>
-            <span className="text-[11px] text-slate-500">
-              Sample Ward Dataset
-            </span>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="rounded-xl bg-slate-50 p-3">
-              <p className="text-[11px] font-medium text-slate-500">Active</p>
+              <p className="text-[11px] font-medium text-slate-500">{t('home.summaryOpen')}</p>
               <p className="mt-0.5 font-mono text-xl font-bold text-slate-900 tabular-nums">
                 {activeCount}
               </p>
             </div>
             <div className="rounded-xl bg-red-50/70 p-3">
-              <p className="text-[11px] font-medium text-red-700">Critical</p>
+              <p className="text-[11px] font-medium text-red-700">{t('sev.critical')}</p>
               <p className="mt-0.5 font-mono text-xl font-bold text-red-600 tabular-nums">
                 {criticalCount}
               </p>
             </div>
             <div className="rounded-xl bg-emerald-50/70 p-3">
-              <p className="text-[11px] font-medium text-emerald-700">Resolved</p>
+              <p className="text-[11px] font-medium text-emerald-700">{t('home.summaryResolved')}</p>
               <p className="mt-0.5 font-mono text-xl font-bold text-emerald-700 tabular-nums">
                 {resolvedCount}
               </p>
             </div>
             <div className="rounded-xl bg-indigo-50/70 p-3">
               <p className="text-[11px] font-medium text-indigo-700">
-                Total Support
+                {t('issue.communitySupport')}
               </p>
               <p className="mt-0.5 font-mono text-xl font-bold text-indigo-700 tabular-nums">
                 {totalSupports}

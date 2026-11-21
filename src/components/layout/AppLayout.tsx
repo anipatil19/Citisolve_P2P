@@ -11,22 +11,25 @@ import {
   LogOut,
   User,
 } from 'lucide-react';
+import {LanguageSelector} from '../common/LanguageSelector';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-const DESKTOP_NAV_LINKS = [
-  {to: '/home', label: 'Home'},
-  {to: '/report', label: 'Report Issue'},
-  {to: '/status', label: 'My Complaints'},
-  {to: '/rewards', label: 'My Points'},
-  {to: '/history', label: 'History'},
-  {to: '/profile', label: 'Profile'},
-];
-
 export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
+  const {t} = useTranslation();
+
+  const DESKTOP_NAV_LINKS = [
+    {to: '/home', label: t('nav.home')},
+    {to: '/report', label: t('home.tileReport')},
+    {to: '/status', label: t('home.tileMyComplaints')},
+    {to: '/rewards', label: t('nav.rewards')},
+    {to: '/history', label: t('nav.history')},
+    {to: '/profile', label: t('nav.profile')},
+  ];
   const {
     currentUser,
     notifications,
@@ -89,10 +92,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
           </nav>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            <LanguageSelector compact />
+
             <div className="relative">
               <button
                 type="button"
-                aria-label={`Notifications (${unreadNotificationsCount} unread)`}
+                aria-label={`${t('nav.notifications')} (${unreadNotificationsCount})`}
                 onClick={() => {
                   setNotifOpen((prev) => !prev);
                   setProfileMenuOpen(false);
@@ -110,12 +115,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
               {notifOpen && (
                 <div
                   role="dialog"
-                  aria-label="Citizen notifications"
+                  aria-label={t('nav.notifications')}
                   className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl z-50"
                 >
                   <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                     <h2 className="font-display text-sm font-semibold text-slate-900">
-                      Alerts &amp; Updates
+                      {t('nav.notifications')}
                     </h2>
                     {unreadNotificationsCount > 0 && (
                       <button
@@ -124,7 +129,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
                         className="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 cursor-pointer"
                       >
                         <Check className="h-3.5 w-3.5" />
-                        Mark all read
+                        {t('nav.markAllRead')}
                       </button>
                     )}
                   </div>
@@ -132,7 +137,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
                   <div className="mt-2 max-h-72 space-y-2 overflow-y-auto">
                     {notifications.length === 0 ? (
                       <p className="py-6 text-center text-xs text-slate-500">
-                        No updates yet.
+                        {t('nav.noNotifications')}
                       </p>
                     ) : (
                       notifications.slice(0, 6).map((item) => (
@@ -178,10 +183,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
                   {(currentUser?.name ?? 'C').charAt(0).toUpperCase()}
                 </span>
                 <span className="hidden sm:inline max-w-28 truncate">
-                  {currentUser?.name ?? 'Citizen'}
+                  {currentUser?.name ?? t('common.citizen')}
                 </span>
                 <span className="hidden md:inline font-mono text-xs font-semibold text-indigo-600 tabular-nums">
-                  {totalAwardedPoints} pts
+                  {t('nav.ptsBadge', {pts: totalAwardedPoints})}
                 </span>
               </button>
 
@@ -201,7 +206,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
                     className="mt-1 flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
                   >
                     <User className="h-4 w-4 text-slate-500" />
-                    Profile &amp; Permissions
+                    {t('nav.profile')}
                   </Link>
                   <button
                     type="button"
@@ -209,7 +214,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
                     className="flex min-h-10 w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50 cursor-pointer"
                   >
                     <LogOut className="h-4 w-4" />
-                    Log out
+                    {t('common.signOut')}
                   </button>
                 </div>
               )}
@@ -220,7 +225,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
               className="hidden lg:inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 whitespace-nowrap shrink-0"
             >
               <Camera className="h-4 w-4" aria-hidden="true" />
-              <span>Report Issue</span>
+              <span>{t('home.tileReport')}</span>
             </Link>
           </div>
         </div>
@@ -248,7 +253,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
           }
         >
           <Home className="h-5 w-5" />
-          <span>Home</span>
+          <span>{t('nav.home')}</span>
         </NavLink>
 
         <NavLink
@@ -260,13 +265,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
           }
         >
           <Clock className="h-5 w-5" />
-          <span>Complaints</span>
+          <span>{t('nav.track')}</span>
         </NavLink>
 
         <div className="flex items-center justify-center">
           <Link
             to="/report"
-            aria-label="Report an Issue"
+            aria-label={t('home.tileReport')}
             className="flex h-12 w-12 -translate-y-2 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition-transform active:scale-95"
           >
             <Camera className="h-5 w-5" />
@@ -282,7 +287,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
           }
         >
           <Award className="h-5 w-5" />
-          <span>Points</span>
+          <span>{t('nav.rewards')}</span>
         </NavLink>
 
         <NavLink
@@ -294,18 +299,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
           }
         >
           <History className="h-5 w-5" />
-          <span>History</span>
+          <span>{t('nav.history')}</span>
         </NavLink>
       </nav>
 
       <footer className="hidden border-t border-slate-200 bg-white lg:block">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4 text-xs text-slate-500">
           <span>
-            CitiSOLVE — Your City. Your Voice. Your Impact. · Mobile-First Citizen Portal
+            {t('brand.name')} — {t('brand.tagline')}
           </span>
-          <span>
-            Demonstration Mode · Public views protect reporter identity &amp; doorstep coordinates
-          </span>
+          <span>{t('nav.footerTagline')}</span>
         </div>
       </footer>
     </div>

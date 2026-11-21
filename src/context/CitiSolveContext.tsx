@@ -43,6 +43,7 @@ const STORAGE_KEY = 'citisolve_demo_state_v1';
 const SESSION_SUBMITTED_KEY = 'citisolve_session_submitted_v1';
 
 interface PersistedState {
+  appLanguage: SupportedLanguageCode;
   currentUser: CitizenUser | null;
   currentOfficial: OfficialUser | null;
   issues: CivicIssue[];
@@ -82,6 +83,8 @@ export interface SubmitComplaintInput {
 }
 
 interface CitiSolveContextValue {
+  appLanguage: SupportedLanguageCode;
+  setAppLanguage: (lang: SupportedLanguageCode) => void;
   currentUser: CitizenUser | null;
   currentOfficial: OfficialUser | null;
   issues: CivicIssue[];
@@ -185,6 +188,8 @@ function loadInitialState(): PersistedState {
       const parsed = JSON.parse(raw) as Partial<PersistedState>;
       if (parsed && Array.isArray(parsed.issues)) {
         return {
+          appLanguage:
+            parsed.appLanguage ?? parsed.currentUser?.preferredLanguage ?? 'en',
           currentUser: parsed.currentUser ?? null,
           currentOfficial: parsed.currentOfficial ?? null,
           issues: parsed.issues,
@@ -208,6 +213,7 @@ function loadInitialState(): PersistedState {
     // Fallback cleanly to initial demonstration seed
   }
   return {
+    appLanguage: 'en',
     currentUser: null,
     currentOfficial: null,
     issues: INITIAL_DEMO_ISSUES,
@@ -257,6 +263,7 @@ export const CitiSolveProvider: React.FC<{children: React.ReactNode}> = ({
   );
 
   useEffect(() => {
+    document.documentElement.lang = state.appLanguage;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch {
@@ -343,6 +350,7 @@ export const CitiSolveProvider: React.FC<{children: React.ReactNode}> = ({
       currentOfficial: null,
       currentUser: {
         ...INITIAL_DEMO_USER,
+        preferredLanguage: prev.appLanguage,
         locationSourceLabel:
           provider === 'google'
             ? 'Google Sign-In Demo · Indiranagar Ward 80'
@@ -367,6 +375,7 @@ export const CitiSolveProvider: React.FC<{children: React.ReactNode}> = ({
       currentOfficial: null,
       currentUser: {
         ...INITIAL_DEMO_USER,
+        preferredLanguage: prev.appLanguage,
         email: clean.includes('@') ? clean : INITIAL_DEMO_USER.email,
         phone: clean.includes('@') ? INITIAL_DEMO_USER.phone : clean,
       },
@@ -447,6 +456,7 @@ export const CitiSolveProvider: React.FC<{children: React.ReactNode}> = ({
 
     setState((prev) => ({
       ...prev,
+      appLanguage: input.preferredLanguage,
       currentOfficial: null,
       currentUser: newUser,
       notifications: [
@@ -491,6 +501,16 @@ export const CitiSolveProvider: React.FC<{children: React.ReactNode}> = ({
     }));
   };
 
+  const setAppLanguage = (lang: SupportedLanguageCode) => {
+    setState((prev) => ({
+      ...prev,
+      appLanguage: lang,
+      currentUser: prev.currentUser
+        ? {...prev.currentUser, preferredLanguage: lang}
+        : null,
+    }));
+  };
+
   const updateProfile = (updates: Partial<CitizenUser>) => {
     setState((prev) => {
       if (!prev.currentUser) return prev;
@@ -501,6 +521,7 @@ export const CitiSolveProvider: React.FC<{children: React.ReactNode}> = ({
       );
       return {
         ...prev,
+        appLanguage: updates.preferredLanguage ?? prev.appLanguage,
         currentUser: updatedUser,
         issues: prev.issues.map((issue) =>
           issue.reporterId === updatedUser.id
@@ -1454,8 +1475,12 @@ export const CitiSolveProvider: React.FC<{children: React.ReactNode}> = ({
     localStorage.removeItem(STORAGE_KEY);
     sessionStorage.removeItem(SESSION_SUBMITTED_KEY);
     setSessionSubmittedIds([]);
-    setState({
-      currentUser: INITIAL_DEMO_USER,
+    setState((prev) => ({
+      appLanguage: prev.appLanguage,
+      currentUser: {
+        ...INITIAL_DEMO_USER,
+        preferredLanguage: prev.appLanguage,
+      },
       currentOfficial: null,
       issues: INITIAL_DEMO_ISSUES,
       rewards: INITIAL_DEMO_REWARDS,
@@ -1463,7 +1488,7 @@ export const CitiSolveProvider: React.FC<{children: React.ReactNode}> = ({
       officialNotifications: INITIAL_OFFICIAL_NOTIFICATIONS,
       officialAuditLog: INITIAL_OFFICIAL_AUDIT_LOG,
       slaConfig: {...DEFAULT_SLA_BY_SEVERITY},
-    });
+    }));
   };
 
   const requestLiveLocationAccess = (): Promise<{
@@ -1559,6 +1584,8 @@ export const CitiSolveProvider: React.FC<{children: React.ReactNode}> = ({
   return (
     <CitiSolveContext.Provider
       value={{
+        appLanguage: state.appLanguage,
+        setAppLanguage,
         currentUser,
         currentOfficial,
         issues: state.issues,

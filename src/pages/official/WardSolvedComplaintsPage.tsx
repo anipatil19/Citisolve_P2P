@@ -7,10 +7,12 @@ import {
   SeverityLabel,
 } from '../../components/common/SeverityAndStatus';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 import {isIssueClosed} from '../../utils/officialHelpers';
 
 export const WardSolvedComplaintsPage: React.FC = () => {
   const {currentOfficial, officialJurisdictionIssues} = useCitiSolve();
+  const {t, tDept} = useTranslation();
 
   const solvedIssues = useMemo(
     () =>
@@ -29,26 +31,25 @@ export const WardSolvedComplaintsPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-[#0F172A] sm:text-2xl">
-            3. Solved Complaints Status
+            {t('ward.solvedTitle')}
           </h1>
           <p className="mt-0.5 text-xs text-slate-600">
-            Solved complaints in{' '}
+            {t('ward.solvedSubtitle')}{' '}
             <strong className="text-[#0F766E]">
               {currentOfficial?.authorizedWards.join(', ')}
-            </strong>{' '}
-            — visible across Citizen and Municipal Officer dashboards.
+            </strong>
           </p>
         </div>
 
         <span className="inline-flex items-center gap-1.5 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-1.5 font-mono text-xs font-bold text-[#0B8043]">
           <CheckCircle2 className="h-4 w-4" />
-          <span>{solvedIssues.length} Solved Complaints</span>
+          <span>{t('ward.solvedCountBadge', {count: solvedIssues.length})}</span>
         </span>
       </div>
 
       {solvedIssues.length === 0 ? (
         <div className="rounded-lg border border-[#E2E8F0] bg-white p-8 text-center text-xs text-slate-500">
-          No solved complaints recorded yet in this ward.
+          {t('ward.noSolvedYet')}
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -84,7 +85,7 @@ export const WardSolvedComplaintsPage: React.FC = () => {
                     <p className="text-xs text-slate-600">
                       {issue.approximateArea} ·{' '}
                       <strong className="text-[#0F766E]">
-                        {issue.assignedDepartments.join(' + ')}
+                        {issue.assignedDepartments.map((d) => tDept(d)).join(' + ')}
                       </strong>
                     </p>
                   </div>
@@ -92,7 +93,7 @@ export const WardSolvedComplaintsPage: React.FC = () => {
 
                 <div className="rounded-md border border-[#E2E8F0] bg-[#F8FAFC] p-2.5 text-xs space-y-1">
                   <p className="font-semibold text-[#0F172A]">
-                    Resolution Summary
+                    {t('ward.resolutionSummary')}
                   </p>
                   <p className="text-slate-700">
                     {issue.resolutionEvidence?.note ??
@@ -112,13 +113,13 @@ export const WardSolvedComplaintsPage: React.FC = () => {
 
                 <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
                   <span className="font-medium text-emerald-700">
-                    Synced with Citizen &amp; Municipal Officer portals
+                    {t('ward.syncedTag')}
                   </span>
                   <Link
                     to={`/official/complaints/${issue.id}`}
                     className="inline-flex items-center gap-1 font-semibold text-[#0F766E] hover:underline"
                   >
-                    <span>Dossier</span>
+                    <span>{t('ward.dossierBtn')}</span>
                     <ArrowUpRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>

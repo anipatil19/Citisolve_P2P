@@ -10,14 +10,16 @@ import {
   ResolutionStatusLabel,
   SeverityLabel,
 } from '../../components/common/SeverityAndStatus';
-import {CATEGORY_MAP, MUNICIPAL_DEPARTMENTS} from '../../constants/civicDomain';
+import {MUNICIPAL_DEPARTMENTS} from '../../constants/civicDomain';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 import {
   getComplaintAgeLabel,
   isIssueClosed,
   isIssueOverdue,
   sortIssuesBySafetyAndSla,
 } from '../../utils/officialHelpers';
+import type {IssueCategoryId} from '../../types/civic';
 
 export const OfficialDashboardPage: React.FC = () => {
   const {
@@ -25,6 +27,7 @@ export const OfficialDashboardPage: React.FC = () => {
     officialJurisdictionIssues,
     slaConfig,
   } = useCitiSolve();
+  const {t, tc, tDept} = useTranslation();
 
   const stats = useMemo(() => {
     const total = officialJurisdictionIssues.length;
@@ -105,23 +108,23 @@ export const OfficialDashboardPage: React.FC = () => {
     }
     return Array.from(counts.entries())
       .map(([cat, count]) => ({
-        label: CATEGORY_MAP[cat as keyof typeof CATEGORY_MAP]?.shortLabel ?? cat,
+        label: tc(cat as IssueCategoryId, true),
         count,
       }))
       .sort((a, b) => b.count - a.count);
-  }, [officialJurisdictionIssues]);
+  }, [officialJurisdictionIssues, tc]);
 
   const statusDistribution = useMemo(() => {
     const groups = [
       {
-        label: 'New / AI Analysed',
+        label: t('offDash.newComplaints'),
         count: officialJurisdictionIssues.filter(
           (i) => i.status === 'submitted' || i.status === 'ai_analysed'
         ).length,
         color: 'bg-sky-600',
       },
       {
-        label: 'Assigned / Dept Received',
+        label: t('offComp.filterAssigned'),
         count: officialJurisdictionIssues.filter(
           (i) =>
             i.status === 'assigned' || i.status === 'received_by_department'
@@ -129,21 +132,21 @@ export const OfficialDashboardPage: React.FC = () => {
         color: 'bg-amber-600',
       },
       {
-        label: 'Under Process',
+        label: t('offDash.inProgress'),
         count: officialJurisdictionIssues.filter(
           (i) => i.status === 'under_process'
         ).length,
         color: 'bg-[#0F766E]',
       },
       {
-        label: 'Awaiting Confirm / Closed',
+        label: t('offDash.solvedCount'),
         count: officialJurisdictionIssues.filter((i) => isIssueClosed(i))
           .length,
         color: 'bg-emerald-600',
       },
     ];
     return groups;
-  }, [officialJurisdictionIssues]);
+  }, [officialJurisdictionIssues, t]);
 
   const wardOverview = useMemo(() => {
     const map = new Map<
@@ -179,13 +182,13 @@ export const OfficialDashboardPage: React.FC = () => {
   if (!currentOfficial) return null;
 
   const summaryCards = [
-    {label: 'Total in Jurisdiction', value: stats.total, tone: 'text-[#0F172A]'},
-    {label: 'New Complaints', value: stats.newCount, tone: 'text-sky-700'},
-    {label: 'Critical Hazards', value: stats.critical, tone: 'text-red-600'},
-    {label: 'High Priority', value: stats.high, tone: 'text-orange-600'},
-    {label: 'In Progress', value: stats.inProgress, tone: 'text-[#0F766E]'},
-    {label: 'Resolved', value: stats.resolved, tone: 'text-emerald-700'},
-    {label: 'Overdue (SLA)', value: stats.overdue, tone: 'text-red-700'},
+    {label: t('offDash.totalInJurisdiction'), value: stats.total, tone: 'text-[#0F172A]'},
+    {label: t('offDash.newComplaints'), value: stats.newCount, tone: 'text-sky-700'},
+    {label: t('sev.critical'), value: stats.critical, tone: 'text-red-600'},
+    {label: t('sev.high'), value: stats.high, tone: 'text-orange-600'},
+    {label: t('offDash.inProgress'), value: stats.inProgress, tone: 'text-[#0F766E]'},
+    {label: t('common.resolved'), value: stats.resolved, tone: 'text-emerald-700'},
+    {label: t('offDash.overdueSla'), value: stats.overdue, tone: 'text-red-700'},
   ];
 
   return (
@@ -193,17 +196,17 @@ export const OfficialDashboardPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-[#0F172A] sm:text-2xl">
-            Municipal Operations Overview
+            {t('offDash.title')}
           </h1>
           <p className="mt-0.5 text-xs text-slate-600">
-            Authorized scope: {currentOfficial.authorizedWards.join(', ')} · Safety-first SLA queue (never ranked solely by upvotes)
+            {t('offDash.subtitle', {wards: currentOfficial.authorizedWards.join(', ')})}
           </p>
         </div>
         <Link
           to="/official/complaints"
           className="inline-flex min-h-9 items-center gap-1.5 rounded-md bg-[#0F766E] px-3.5 py-2 text-xs font-semibold text-white hover:bg-[#115E59]"
         >
-          <span>Manage All Complaints</span>
+          <span>{t('offDash.manageAll')}</span>
           <ArrowUpRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -232,14 +235,14 @@ export const OfficialDashboardPage: React.FC = () => {
             <div className="flex items-center gap-2 text-red-800">
               <AlertOctagon className="h-4 w-4 shrink-0" />
               <h2 className="font-display text-sm font-bold">
-                Critical Safety &amp; Overdue SLA Alerts ({criticalAndOverdue.length})
+                {t('offDash.slaBreached')} ({criticalAndOverdue.length})
               </h2>
             </div>
             <Link
               to="/official/escalations"
               className="text-xs font-semibold text-red-800 hover:underline"
             >
-              Open Escalation Console &rarr;
+              {t('offNav.escalations')} &rarr;
             </Link>
           </div>
           <div className="grid gap-2.5 md:grid-cols-2">
@@ -257,7 +260,7 @@ export const OfficialDashboardPage: React.FC = () => {
                     <SeverityLabel severity={issue.safetySeverity} compact />
                     {isIssueOverdue(issue, slaConfig) && (
                       <span className="font-mono text-[11px] font-semibold text-red-700">
-                        OVERDUE
+                        {t('offDash.overdueTag')}
                       </span>
                     )}
                   </div>
@@ -277,10 +280,10 @@ export const OfficialDashboardPage: React.FC = () => {
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 lg:col-span-7 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-base font-bold text-[#0F172A]">
-              Priority-Sorted Complaint Queue
+              {t('offDash.priorityQueue')}
             </h2>
             <span className="text-[11px] text-slate-500">
-              Sorted by Severity &amp; SLA Deadline
+              {t('offDash.sortedBySla')}
             </span>
           </div>
 
@@ -302,7 +305,7 @@ export const OfficialDashboardPage: React.FC = () => {
                     {issue.title}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {issue.hierarchy.ward} · {issue.assignedDepartments.join(' + ')} · Age{' '}
+                    {issue.hierarchy.ward} · {issue.assignedDepartments.map((d) => tDept(d)).join(' + ')} · {t('offDash.ageLabel')}{' '}
                     <span className="font-mono">
                       {getComplaintAgeLabel(issue.createdAt)}
                     </span>
@@ -312,7 +315,7 @@ export const OfficialDashboardPage: React.FC = () => {
                   to={`/official/complaints/${issue.id}`}
                   className="inline-flex min-h-9 items-center gap-1 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs font-semibold text-[#0F766E] hover:bg-teal-50 shrink-0"
                 >
-                  <span>Inspect</span>
+                  <span>{t('offComp.inspectBtn')}</span>
                   <ArrowUpRight className="h-3.5 w-3.5" />
                 </Link>
               </div>
@@ -322,7 +325,7 @@ export const OfficialDashboardPage: React.FC = () => {
 
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 lg:col-span-5 space-y-3">
           <h2 className="font-display text-base font-bold text-[#0F172A]">
-            Recent Complaint Activity
+            {t('offDash.recentActivity')}
           </h2>
           <div className="divide-y divide-[#E2E8F0]">
             {recentActivity.map((act) => (
@@ -353,7 +356,7 @@ export const OfficialDashboardPage: React.FC = () => {
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
           <h2 className="font-display text-base font-bold text-[#0F172A]">
-            Category-Wise Complaints (Demonstration + Session)
+            {t('offDash.categoryWise')}
           </h2>
           <div className="space-y-2.5">
             {categoryBreakdown.map((item) => {
@@ -382,7 +385,7 @@ export const OfficialDashboardPage: React.FC = () => {
 
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
           <h2 className="font-display text-base font-bold text-[#0F172A]">
-            Complaint Status Distribution
+            {t('offDash.statusDist')}
           </h2>
           <div className="space-y-2.5">
             {statusDistribution.map((grp) => {
@@ -414,7 +417,7 @@ export const OfficialDashboardPage: React.FC = () => {
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-base font-bold text-[#0F172A]">
-              Ward-Wise Overview
+              {t('offDash.wardOverview')}
             </h2>
             <ShieldAlert className="h-4 w-4 text-[#0F766E]" />
           </div>
@@ -422,10 +425,10 @@ export const OfficialDashboardPage: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="border-b border-[#E2E8F0] text-slate-500">
                 <tr>
-                  <th className="py-2 pr-3 font-semibold">Authorized Ward</th>
-                  <th className="py-2 px-3 font-semibold">Total</th>
-                  <th className="py-2 px-3 font-semibold">Open</th>
-                  <th className="py-2 pl-3 font-semibold">Overdue</th>
+                  <th className="py-2 pr-3 font-semibold">{t('offDash.colWard')}</th>
+                  <th className="py-2 px-3 font-semibold">{t('offDash.colTotal')}</th>
+                  <th className="py-2 px-3 font-semibold">{t('offDash.colOpen')}</th>
+                  <th className="py-2 pl-3 font-semibold">{t('offDash.colOverdue')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E2E8F0]">
@@ -446,22 +449,22 @@ export const OfficialDashboardPage: React.FC = () => {
 
         <section className="rounded-lg border border-[#E2E8F0] bg-white p-5 space-y-3">
           <h2 className="font-display text-base font-bold text-[#0F172A]">
-            Department Performance Summary
+            {t('offDash.deptPerformance')}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="border-b border-[#E2E8F0] text-slate-500">
                 <tr>
-                  <th className="py-2 pr-3 font-semibold">Department</th>
-                  <th className="py-2 px-3 font-semibold">Assigned</th>
-                  <th className="py-2 px-3 font-semibold">Resolved</th>
-                  <th className="py-2 pl-3 font-semibold">Overdue</th>
+                  <th className="py-2 pr-3 font-semibold">{t('offDash.colDept')}</th>
+                  <th className="py-2 px-3 font-semibold">{t('offDash.colAssigned')}</th>
+                  <th className="py-2 px-3 font-semibold">{t('offDash.colResolved')}</th>
+                  <th className="py-2 pl-3 font-semibold">{t('offDash.colOverdue')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E2E8F0]">
                 {deptPerformance.map((d) => (
                   <tr key={d.dept}>
-                    <td className="py-2.5 pr-3 font-medium text-[#0F172A]">{d.dept}</td>
+                    <td className="py-2.5 pr-3 font-medium text-[#0F172A]">{tDept(d.dept)}</td>
                     <td className="py-2.5 px-3 font-mono tabular-nums">{d.total}</td>
                     <td className="py-2.5 px-3 font-mono text-emerald-700 tabular-nums">
                       {d.resolved}

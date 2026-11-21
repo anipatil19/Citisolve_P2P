@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import {REWARD_MILESTONES, REWARD_RULES} from '../constants/civicDomain';
 import {useCitiSolve} from '../context/CitiSolveContext';
+import {useTranslation} from '../i18n/useTranslation';
 import type {RewardMilestoneTier} from '../types/civic';
 
 export const RewardsDashboardPage: React.FC = () => {
@@ -18,6 +19,7 @@ export const RewardsDashboardPage: React.FC = () => {
     totalAwardedPoints,
     totalPendingPoints,
   } = useCitiSolve();
+  const {t} = useTranslation();
 
   const [boardScope, setBoardScope] = useState<'locality' | 'district'>('locality');
   const [certPreviewTier, setCertPreviewTier] =
@@ -54,27 +56,27 @@ export const RewardsDashboardPage: React.FC = () => {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h1 className="font-display text-2xl font-bold text-slate-900">
-              My Points &amp; Civic Recognition
+              {t('rewards.title')}
             </h1>
             <p className="mt-1 text-sm text-slate-600">
-              Transparent demonstration reward ledger with anti-spam single-action rules and milestone recognition.
+              {t('rewards.subtitle')}
             </p>
           </div>
           <span className="text-xs text-slate-500">
-            Platform Recognition · Does not promise automatic government employment
+            {t('rewards.disclaimerTag')}
           </span>
         </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-12">
           <div className="flex flex-col items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-6 lg:col-span-4">
             <p className="text-xs font-semibold text-slate-700">
-              Citizen Reward Bucket
+              {t('rewards.bucketTitle')}
             </p>
 
             <div className="relative mt-4 flex h-48 w-40 flex-col justify-end overflow-hidden rounded-b-3xl rounded-t-md border-2 border-slate-300 bg-white p-3">
               <div
                 className="flex flex-wrap-reverse content-start justify-center gap-1.5 transition-all duration-300"
-                aria-label={`${totalAwardedPoints} awarded points stacked inside reward bucket`}
+                aria-label={`${totalAwardedPoints} ${t('common.pts')}`}
               >
                 {Array.from({length: coinCount}).map((_, idx) => (
                   <div
@@ -86,37 +88,40 @@ export const RewardsDashboardPage: React.FC = () => {
                 ))}
               </div>
               <div className="pointer-events-none absolute inset-x-0 top-2 text-center font-mono text-[11px] font-semibold text-slate-400 tabular-nums">
-                {progressPct}% of 100 pt Gold
+                {t('rewards.goldProgress', {pct: progressPct})}
               </div>
             </div>
 
             <p className="mt-3 font-mono text-2xl font-bold text-slate-900 tabular-nums">
-              {totalAwardedPoints} pts
+              {totalAwardedPoints} {t('common.pts')}
             </p>
             <p className="text-xs text-slate-500">
               {totalAwardedPoints >= 100
-                ? 'Gold Milestone Reached'
-                : `${nextMilestone.pointsRequired - totalAwardedPoints} pts to ${nextMilestone.title}`}
+                ? t('rewards.goldReached')
+                : t('rewards.ptsToTier', {
+                    pts: nextMilestone.pointsRequired - totalAwardedPoints,
+                    tier: nextMilestone.title,
+                  })}
             </p>
           </div>
 
           <div className="space-y-5 lg:col-span-8">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="rounded-lg border border-slate-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">Awarded Points</p>
+                <p className="text-xs font-medium text-slate-500">{t('rewards.awardedPoints')}</p>
                 <p className="mt-1 font-mono text-2xl font-bold text-indigo-600 tabular-nums">
                   {totalAwardedPoints}
                 </p>
               </div>
               <div className="rounded-lg border border-slate-200 bg-white p-4">
-                <p className="text-xs font-medium text-slate-500">Pending Points</p>
+                <p className="text-xs font-medium text-slate-500">{t('rewards.pendingPoints')}</p>
                 <p className="mt-1 font-mono text-2xl font-bold text-amber-700 tabular-nums">
                   {totalPendingPoints}
                 </p>
               </div>
               <div className="rounded-lg border border-slate-200 bg-white p-4">
                 <p className="text-xs font-medium text-slate-500">
-                  Total Potential (Awarded + Pending)
+                  {t('rewards.totalPotential')}
                 </p>
                 <p className="mt-1 font-mono text-2xl font-bold text-slate-900 tabular-nums">
                   {totalAwardedPoints + totalPendingPoints}
@@ -126,40 +131,40 @@ export const RewardsDashboardPage: React.FC = () => {
 
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
               <h2 className="font-display text-sm font-semibold text-slate-900">
-                Transparent Demonstration Reward Rules
+                {t('rewards.rulesTitle')}
               </h2>
               <div className="mt-2.5 grid gap-3 text-xs text-slate-700 sm:grid-cols-3">
                 <div className="rounded border border-slate-200 bg-white p-3">
                   <p className="font-mono font-bold text-indigo-600">
-                    +{REWARD_RULES.VERIFIED_REPORT_POINTS} pts
+                    +{REWARD_RULES.VERIFIED_REPORT_POINTS} {t('common.pts')}
                   </p>
                   <p className="mt-0.5 font-medium text-slate-900">
-                    Verified Report
+                    {t('rewards.ruleReport')}
                   </p>
                   <p className="mt-0.5 text-slate-500">
-                    Awarded once per unique submission.
+                    {t('rewards.ruleReportDesc')}
                   </p>
                 </div>
                 <div className="rounded border border-slate-200 bg-white p-3">
                   <p className="font-mono font-bold text-indigo-600">
-                    +{REWARD_RULES.UPVOTE_PARTICIPATION_POINTS} pts
+                    +{REWARD_RULES.UPVOTE_PARTICIPATION_POINTS} {t('common.pts')}
                   </p>
                   <p className="mt-0.5 font-medium text-slate-900">
-                    Upvote Support
+                    {t('rewards.ruleUpvote')}
                   </p>
                   <p className="mt-0.5 text-slate-500">
-                    One-time participation credit per issue; toggling off and on cannot repeat.
+                    {t('rewards.ruleUpvoteDesc')}
                   </p>
                 </div>
                 <div className="rounded border border-slate-200 bg-white p-3">
                   <p className="font-mono font-bold text-indigo-600">
-                    +{REWARD_RULES.RESOLUTION_CONFIRMATION_POINTS} pts
+                    +{REWARD_RULES.RESOLUTION_CONFIRMATION_POINTS} {t('common.pts')}
                   </p>
                   <p className="mt-0.5 font-medium text-slate-900">
-                    Resolution Bonus
+                    {t('rewards.ruleConfirm')}
                   </p>
                   <p className="mt-0.5 text-slate-500">
-                    Credited once closure is confirmed.
+                    {t('rewards.ruleConfirmDesc')}
                   </p>
                 </div>
               </div>
@@ -167,7 +172,7 @@ export const RewardsDashboardPage: React.FC = () => {
 
             <div className="space-y-3">
               <h2 className="font-display text-sm font-semibold text-slate-900">
-                Recognition Milestones &amp; Certificates
+                {t('rewards.tierProgress')}
               </h2>
               <div className="grid gap-3 sm:grid-cols-3">
                 {REWARD_MILESTONES.map((m) => {
@@ -195,7 +200,7 @@ export const RewardsDashboardPage: React.FC = () => {
                           {m.tier.toUpperCase()}
                         </span>
                         <span className="font-mono text-xs font-semibold text-slate-700 tabular-nums">
-                          {m.pointsRequired} pts
+                          {m.pointsRequired} {t('common.pts')}
                         </span>
                       </div>
                       <p className="mt-1.5 text-xs font-medium text-slate-800">
@@ -213,7 +218,7 @@ export const RewardsDashboardPage: React.FC = () => {
                         disabled={!unlocked}
                         className="mt-3 w-full min-h-9 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
                       >
-                        {unlocked ? 'View Certificate' : `Locked (${pct}%)`}
+                        {unlocked ? t('rewards.viewCert') : t('rewards.lockedPct', {pct})}
                       </button>
                     </div>
                   );
@@ -223,9 +228,7 @@ export const RewardsDashboardPage: React.FC = () => {
               {totalAwardedPoints >= 100 && (
                 <div className="flex items-start gap-2.5 rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-xs text-indigo-900">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-indigo-600" />
-                  <span>
-                    <strong>100-Point Civic Service Recognition:</strong> You have reached Gold Community Champion status. If your local urban body activates an authorised civic volunteer or nomination programme, an official eligibility link will appear here. Points never imply automatic government employment.
-                  </span>
+                  <span>{t('rewards.goldNote')}</span>
                 </div>
               )}
             </div>
@@ -239,7 +242,7 @@ export const RewardsDashboardPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Trophy className="h-4 w-4 text-indigo-600" />
               <h2 className="font-display text-lg font-semibold text-slate-900">
-                Community Leaderboard
+                {t('rewards.leaderboardTitle')}
               </h2>
             </div>
 
@@ -253,7 +256,7 @@ export const RewardsDashboardPage: React.FC = () => {
                     : 'text-slate-600'
                 }`}
               >
-                Locality / Ward
+                {t('rewards.scopeLocality')}
               </button>
               <button
                 type="button"
@@ -264,17 +267,16 @@ export const RewardsDashboardPage: React.FC = () => {
                     : 'text-slate-600'
                 }`}
               >
-                District (Bengaluru Urban)
+                {t('rewards.scopeDistrict')}
               </button>
             </div>
           </div>
 
           <p className="mt-1 text-xs text-slate-500">
-            Your rank:{' '}
+            {t('rewards.yourRank')}{' '}
             <span className="font-mono font-semibold text-slate-800">
-              {userRank ? `#${userRank}` : 'Unranked'}
-            </span>{' '}
-            · Display respects your Profile privacy setting ({currentUser?.privacyDisplayPreference}).
+              {userRank ? `#${userRank}` : t('rewards.unranked')}
+            </span>
           </p>
 
           <div className="mt-4 divide-y divide-slate-100">
@@ -294,17 +296,17 @@ export const RewardsDashboardPage: React.FC = () => {
                       {entry.displayName}{' '}
                       {entry.isCurrentUser && (
                         <span className="text-xs font-medium text-indigo-600">
-                          (You)
+                          ({t('rewards.youBadge')})
                         </span>
                       )}
                     </p>
                     <p className="truncate text-xs text-slate-500">
-                      {entry.ward} · {entry.resolvedCount} resolved
+                      {entry.ward} · {t('rewards.resolvedCount', {count: entry.resolvedCount})}
                     </p>
                   </div>
                 </div>
                 <span className="font-mono text-sm font-bold text-slate-900 tabular-nums shrink-0">
-                  {entry.points} pts
+                  {entry.points} {t('common.pts')}
                 </span>
               </div>
             ))}
@@ -313,16 +315,16 @@ export const RewardsDashboardPage: React.FC = () => {
 
         <section className="rounded-lg border border-slate-200 bg-white p-6 lg:col-span-6">
           <h2 className="font-display text-lg font-semibold text-slate-900">
-            Reward Activity History
+            {t('rewards.ledgerTitle')}
           </h2>
           <p className="mt-1 text-xs text-slate-500">
-            Deduplicated transaction ledger for your citizen account.
+            {t('rewards.ledgerSub')}
           </p>
 
           <div className="mt-4 max-h-80 divide-y divide-slate-100 overflow-y-auto">
             {userTransactions.length === 0 ? (
               <p className="py-8 text-center text-sm text-slate-500">
-                No reward activity recorded yet.
+                {t('rewards.emptyLedger')}
               </p>
             ) : (
               userTransactions.map((tx) => (
@@ -336,7 +338,7 @@ export const RewardsDashboardPage: React.FC = () => {
                     </p>
                     <p className="mt-0.5 font-mono text-xs text-slate-500 tabular-nums">
                       {new Date(tx.createdAt).toLocaleString('en-IN')} ·{' '}
-                      {tx.status === 'awarded' ? 'Awarded' : 'Pending confirmation'}
+                      {tx.status === 'awarded' ? t('common.awarded') : t('common.pending')}
                     </p>
                   </div>
                   <span
@@ -357,14 +359,14 @@ export const RewardsDashboardPage: React.FC = () => {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Platform recognition certificate preview"
+          aria-label={t('rewards.certDemoHeading')}
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
         >
           <div className="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-6 shadow-xl">
             <div className="flex items-start justify-between gap-3 border-b border-slate-200 pb-3">
               <div>
                 <p className="text-xs font-semibold text-indigo-600">
-                  CitiSOLVE Platform Recognition (Demonstration)
+                  {t('rewards.certDemoHeading')}
                 </p>
                 <h3 className="mt-1 font-display text-xl font-bold text-slate-900">
                   {activeCertMilestone.title}
@@ -372,7 +374,7 @@ export const RewardsDashboardPage: React.FC = () => {
               </div>
               <button
                 type="button"
-                aria-label="Close certificate preview"
+                aria-label={t('common.close')}
                 onClick={() => setCertPreviewTier(null)}
                 className="flex min-h-9 min-w-9 items-center justify-center rounded-md border border-slate-200 text-slate-600 hover:bg-slate-50 cursor-pointer"
               >
@@ -382,16 +384,18 @@ export const RewardsDashboardPage: React.FC = () => {
 
             <div className="my-5 rounded-lg border border-slate-200 bg-slate-50 p-5 text-center space-y-2">
               <CheckCircle2 className="mx-auto h-8 w-8 text-indigo-600" />
-              <p className="text-xs text-slate-500">Presented to</p>
+              <p className="text-xs text-slate-500">{t('rewards.presentedTo')}</p>
               <p className="font-display text-xl font-bold text-slate-900">
                 {currentUser?.name}
               </p>
               <p className="text-xs text-slate-600">
-                For achieving {activeCertMilestone.pointsRequired}+ civic participation points in{' '}
-                {currentUser?.hierarchy.ward}.
+                {t('rewards.certAchieved', {
+                  pts: activeCertMilestone.pointsRequired,
+                  ward: currentUser?.hierarchy.ward ?? '',
+                })}
               </p>
               <p className="pt-2 text-[11px] text-slate-500">
-                Disclaimer: This is a platform demonstration recognition certificate and does not constitute an official municipal appointment or government employment offer.
+                {t('rewards.certDisclaimer')}
               </p>
             </div>
 
@@ -401,7 +405,7 @@ export const RewardsDashboardPage: React.FC = () => {
                 onClick={() => setCertPreviewTier(null)}
                 className="min-h-10 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 cursor-pointer"
               >
-                Close Preview
+                {t('rewards.closePreview')}
               </button>
             </div>
           </div>

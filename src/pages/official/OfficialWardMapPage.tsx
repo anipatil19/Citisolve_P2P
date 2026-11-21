@@ -6,12 +6,14 @@ import {
   SeverityLabel,
 } from '../../components/common/SeverityAndStatus';
 import {OfficialWardMap} from '../../components/official/OfficialWardMap';
-import {CATEGORY_MAP, ISSUE_CATEGORIES} from '../../constants/civicDomain';
+import {ISSUE_CATEGORIES} from '../../constants/civicDomain';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
 import type {ComplaintLifecycleStage, IssueCategoryId} from '../../types/civic';
 
 export const OfficialWardMapPage: React.FC = () => {
   const {currentOfficial, officialJurisdictionIssues} = useCitiSolve();
+  const {t, tc, ts, tDept} = useTranslation();
 
   const [categoryFilter, setCategoryFilter] = useState<'all' | IssueCategoryId>(
     'all'
@@ -45,33 +47,35 @@ export const OfficialWardMapPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-[#0F172A] sm:text-2xl">
-            Authorized Ward Map
+            {t('offMap.title')}
           </h1>
           <p className="mt-0.5 text-xs text-slate-600">
-            Showing {filteredIssues.length} complaint markers inside{' '}
-            {currentOfficial.authorizedWards.join(', ')}.
+            {t('offMap.subtitle', {
+              count: filteredIssues.length,
+              wards: currentOfficial.authorizedWards.join(', '),
+            })}
           </p>
         </div>
 
         <div className="flex flex-wrap gap-2">
           <select
-            aria-label="Filter map by category"
+            aria-label={t('common.allCategories')}
             value={categoryFilter}
             onChange={(e) =>
               setCategoryFilter(e.target.value as 'all' | IssueCategoryId)
             }
             className="min-h-9 rounded-md border border-[#E2E8F0] bg-white px-3 text-xs font-medium text-[#0F172A]"
           >
-            <option value="all">All Categories</option>
+            <option value="all">{t('common.allCategories')}</option>
             {ISSUE_CATEGORIES.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.shortLabel}
+                {tc(c.id, true)}
               </option>
             ))}
           </select>
 
           <select
-            aria-label="Filter map by status"
+            aria-label={t('common.allStatuses')}
             value={statusFilter}
             onChange={(e) =>
               setStatusFilter(
@@ -80,16 +84,16 @@ export const OfficialWardMapPage: React.FC = () => {
             }
             className="min-h-9 rounded-md border border-[#E2E8F0] bg-white px-3 text-xs font-medium text-[#0F172A]"
           >
-            <option value="all">All Statuses</option>
-            <option value="submitted">Submitted</option>
-            <option value="ai_analysed">AI Analysed</option>
-            <option value="assigned">Assigned</option>
-            <option value="received_by_department">Dept Received</option>
-            <option value="under_process">Under Process</option>
+            <option value="all">{t('common.allStatuses')}</option>
+            <option value="submitted">{ts('submitted')}</option>
+            <option value="ai_analysed">{ts('ai_analysed')}</option>
+            <option value="assigned">{ts('assigned')}</option>
+            <option value="received_by_department">{ts('received_by_department', true)}</option>
+            <option value="under_process">{ts('under_process')}</option>
             <option value="resolved_awaiting_confirmation">
-              Awaiting Confirmation
+              {ts('resolved_awaiting_confirmation', true)}
             </option>
-            <option value="resolution_confirmed">Resolution Confirmed</option>
+            <option value="resolution_confirmed">{ts('resolution_confirmed')}</option>
           </select>
         </div>
       </div>
@@ -106,7 +110,7 @@ export const OfficialWardMapPage: React.FC = () => {
 
         <aside className="rounded-lg border border-[#E2E8F0] bg-white p-5 lg:col-span-4 space-y-3">
           <h2 className="font-display text-sm font-bold text-[#0F172A]">
-            Selected Marker Summary
+            {t('offMap.selectedMarker')}
           </h2>
           {selectedIssue ? (
             <div className="space-y-3 text-xs">
@@ -128,10 +132,10 @@ export const OfficialWardMapPage: React.FC = () => {
                   <span>{selectedIssue.approximateArea}</span>
                 </p>
                 <p className="text-slate-600">
-                  Category: {CATEGORY_MAP[selectedIssue.category].label}
+                  {t('offMap.categoryLabel')} {tc(selectedIssue.category)}
                 </p>
                 <p className="text-slate-600">
-                  Dept: {selectedIssue.assignedDepartments.join(' + ')}
+                  {t('offMap.deptLabel')} {selectedIssue.assignedDepartments.map((d) => tDept(d)).join(' + ')}
                 </p>
                 <div className="pt-1">
                   <ResolutionStatusLabel status={selectedIssue.status} />
@@ -142,13 +146,13 @@ export const OfficialWardMapPage: React.FC = () => {
                 to={`/official/complaints/${selectedIssue.id}`}
                 className="flex min-h-10 w-full items-center justify-center gap-1.5 rounded-md bg-[#0F766E] px-4 py-2 text-xs font-semibold text-white hover:bg-[#115E59]"
               >
-                <span>Open Complaint Dossier</span>
+                <span>{t('offMap.openDossier')}</span>
                 <ArrowUpRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           ) : (
             <p className="text-xs text-slate-500">
-              No markers match the active filter.
+              {t('offMap.noMarkers')}
             </p>
           )}
         </aside>

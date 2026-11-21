@@ -28,6 +28,7 @@ import {
 } from '../constants/civicDomain';
 import {useCitiSolve} from '../context/CitiSolveContext';
 import {DEMO_ISSUE_IMAGES} from '../data/demoData';
+import {useTranslation} from '../i18n/useTranslation';
 import {analyzeComplaintWithServer} from '../services/civicAiService';
 import type {
   CivicIssue,
@@ -60,6 +61,7 @@ const SAMPLE_CAMERA_BY_CATEGORY: Record<IssueCategoryId, string> = {
 
 export const ReportIssuePage: React.FC = () => {
   const {currentUser, issues, submitNewComplaint, toggleUpvote} = useCitiSolve();
+  const {lang, t, tc, tcDesc, tDept} = useTranslation();
   const navigate = useNavigate();
 
   const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
@@ -109,8 +111,11 @@ export const ReportIssuePage: React.FC = () => {
 
   // Step 4: Description + Multilingual Voice
   const [language, setLanguage] = useState<SupportedLanguageCode>(
-    currentUser?.preferredLanguage ?? 'en'
+    currentUser?.preferredLanguage ?? lang
   );
+  useEffect(() => {
+    setLanguage(lang);
+  }, [lang]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [listening, setListening] = useState(false);
@@ -383,37 +388,37 @@ export const ReportIssuePage: React.FC = () => {
         <div className="flex items-center gap-2 text-emerald-700">
           <CheckCircle2 className="h-6 w-6" />
           <h1 className="font-display text-2xl font-bold text-slate-900">
-            Complaint Submitted Successfully
+            {t('report.successTitle')}
           </h1>
         </div>
 
         <p className="mt-2 text-sm text-slate-600">
-          Your report is now live in your <strong className="font-semibold text-slate-800">Submitted Reports</strong> list, Status Tracker, Community History, and Citizen Home Map.
+          {t('report.successDesc')}
         </p>
 
         <div className="mt-5 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
           <div>
-            <p className="text-xs text-slate-500">Submitted Complaint ID</p>
+            <p className="text-xs text-slate-500">{t('report.submittedIdLabel')}</p>
             <p className="mt-0.5 font-mono text-base font-bold text-slate-900">
               {submittedConfirmation.issue.id}
             </p>
           </div>
           <div>
-            <p className="text-xs text-slate-500">Demonstration Reward Update</p>
+            <p className="text-xs text-slate-500">{t('report.rewardUpdateLabel')}</p>
             <p className="mt-0.5 font-mono text-base font-bold text-indigo-600">
-              +{submittedConfirmation.pointsEarned} points earned!
+              {t('report.pointsEarnedValue', {pts: submittedConfirmation.pointsEarned})}
             </p>
           </div>
           <div>
-            <p className="text-xs text-slate-500">Safety Severity</p>
+            <p className="text-xs text-slate-500">{t('report.safetySeverityLabel')}</p>
             <div className="mt-1">
               <SeverityLabel severity={submittedConfirmation.issue.safetySeverity} />
             </div>
           </div>
           <div>
-            <p className="text-xs text-slate-500">Routed Department(s)</p>
+            <p className="text-xs text-slate-500">{t('report.routedDepts')}</p>
             <p className="mt-1 text-xs font-semibold text-slate-800">
-              {submittedConfirmation.issue.assignedDepartments.join(' + ')}
+              {submittedConfirmation.issue.assignedDepartments.map((d) => tDept(d)).join(' + ')}
             </p>
           </div>
         </div>
@@ -423,19 +428,19 @@ export const ReportIssuePage: React.FC = () => {
             to={`/status?track=${submittedConfirmation.issue.id}`}
             className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
           >
-            Track Report Status
+            {t('report.trackStatusBtn')}
           </Link>
           <Link
             to={`/issues/${submittedConfirmation.issue.id}`}
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700"
           >
-            View Issue Dossier
+            {t('report.viewDossierBtn')}
           </Link>
           <Link
             to="/home"
             className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
           >
-            Back to Home Map
+            {t('report.backHomeMapBtn')}
           </Link>
         </div>
       </div>
@@ -448,28 +453,24 @@ export const ReportIssuePage: React.FC = () => {
         <div className="flex items-center gap-2 text-indigo-600">
           <ThumbsUp className="h-6 w-6" />
           <h1 className="font-display text-2xl font-bold text-slate-900">
-            Existing Issue Upvoted Instead of Creating Duplicate
+            {t('report.dupUpvotedTitle')}
           </h1>
         </div>
         <p className="mt-2 text-sm text-slate-600">
-          Thank you for confirming this matches{' '}
-          <span className="font-mono font-semibold text-slate-900">
-            {duplicateUpvotedId}
-          </span>
-          . Consolidating community support keeps ward queues focused.
+          {t('report.dupUpvotedDesc', {id: duplicateUpvotedId})}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
             to={`/issues/${duplicateUpvotedId}`}
             className="inline-flex min-h-11 items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
           >
-            View Supported Complaint
+            {t('report.viewSupportedBtn')}
           </Link>
           <Link
             to="/home"
             className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
           >
-            Return to Map
+            {t('report.returnMapBtn')}
           </Link>
         </div>
       </div>
@@ -482,31 +483,31 @@ export const ReportIssuePage: React.FC = () => {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="font-display text-2xl font-bold text-slate-900">
-              Report a Civic Issue
+              {t('report.title')}
             </h1>
             <p className="mt-1 text-sm text-slate-600">
-              Step {step} of 5 · Guided capture with live camera, location verification, and AI triage
+              {t('report.stepProgress', {step})}
             </p>
           </div>
           <span className="font-mono text-xs font-semibold text-indigo-600 tabular-nums">
-            {Math.round((step / 5) * 100)}% Complete
+            {t('report.percentComplete', {pct: Math.round((step / 5) * 100)})}
           </span>
         </div>
 
         <div className="mt-4 grid grid-cols-5 gap-2">
           {[
-            '1. Category',
-            '2. Live Camera',
-            '3. Location',
-            '4. Description',
-            '5. AI & Submit',
+            t('report.tab1'),
+            t('report.tab2'),
+            t('report.tab3'),
+            t('report.tab4'),
+            t('report.tab5'),
           ].map((label, idx) => {
             const num = idx + 1;
             const active = step === num;
             const done = step > num;
             return (
               <div
-                key={label}
+                key={idx}
                 className={`rounded-md border px-2 py-2 text-center text-xs font-medium ${
                   active
                     ? 'border-indigo-600 bg-indigo-50 text-indigo-900'
@@ -526,7 +527,7 @@ export const ReportIssuePage: React.FC = () => {
         {step === 1 && (
           <div className="space-y-4">
             <h2 className="font-display text-lg font-semibold text-slate-900">
-              Step 1: Select Civic Issue Category
+              {t('report.step1Title')}
             </h2>
             <div className="grid gap-3 sm:grid-cols-2">
               {ISSUE_CATEGORIES.map((cat) => {
@@ -553,10 +554,10 @@ export const ReportIssuePage: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-slate-900">
-                        {cat.label}
+                        {tc(cat.id)}
                       </p>
                       <p className="mt-1 text-xs leading-relaxed text-slate-600">
-                        {cat.description}
+                        {tcDesc(cat.id)}
                       </p>
                     </div>
                   </button>
@@ -570,7 +571,7 @@ export const ReportIssuePage: React.FC = () => {
                 onClick={() => setStep(2)}
                 className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer"
               >
-                <span>Continue to Live Camera</span>
+                <span>{t('report.continueCamera')}</span>
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
@@ -582,10 +583,10 @@ export const ReportIssuePage: React.FC = () => {
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <h2 className="font-display text-lg font-semibold text-slate-900">
-                  Step 2: Capture Live Photograph Evidence
+                  {t('report.step2Title')}
                 </h2>
                 <p className="mt-1 text-xs text-slate-600">
-                  Live in-app camera capture only—gallery file uploads are intentionally excluded in the citizen reporting flow.
+                  {t('report.step2Policy')}
                 </p>
               </div>
             </div>
@@ -617,15 +618,15 @@ export const ReportIssuePage: React.FC = () => {
                   />
                   <div className="border-t border-slate-200 bg-white px-4 py-2 text-xs text-slate-600">
                     {photoCapturedLive
-                      ? 'Captured via live in-app camera'
-                      : 'Preview Demonstration Frame (Camera unavailable on current device)'}
+                      ? t('report.capturedLiveLabel')
+                      : t('report.previewFrameLabel')}
                   </div>
                 </div>
               ) : (
                 <div className="flex h-64 flex-col items-center justify-center gap-3 p-6 text-center text-slate-200">
                   <Camera className="h-8 w-8 text-indigo-400" />
                   <p className="max-w-md text-sm">
-                    Allow camera access to photograph the issue directly on site.
+                    {t('report.cameraAllowPrompt')}
                   </p>
                 </div>
               )}
@@ -639,7 +640,7 @@ export const ReportIssuePage: React.FC = () => {
                   className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer"
                 >
                   <Camera className="h-4 w-4" />
-                  <span>Capture Photo</span>
+                  <span>{t('report.capturePhoto')}</span>
                 </button>
               ) : cameraState === 'captured' ? (
                 <button
@@ -648,7 +649,7 @@ export const ReportIssuePage: React.FC = () => {
                   className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-800 hover:bg-slate-50 cursor-pointer"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  <span>Retake Photograph</span>
+                  <span>{t('report.retakePhoto')}</span>
                 </button>
               ) : (
                 <button
@@ -660,8 +661,8 @@ export const ReportIssuePage: React.FC = () => {
                   <Camera className="h-4 w-4" />
                   <span>
                     {cameraState === 'requesting'
-                      ? 'Requesting Camera...'
-                      : 'Open Live Camera'}
+                      ? t('report.requestingCamera')
+                      : t('report.openLiveCamera')}
                   </span>
                 </button>
               )}
@@ -672,7 +673,7 @@ export const ReportIssuePage: React.FC = () => {
                   onClick={usePreviewCameraFrame}
                   className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
                 >
-                  Use Demonstration Camera Frame (No Webcam Fallback)
+                  {t('report.useDemoFrame')}
                 </button>
               )}
             </div>
@@ -687,7 +688,7 @@ export const ReportIssuePage: React.FC = () => {
                 className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
                 <ChevronLeft className="h-4 w-4" />
-                <span>Back</span>
+                <span>{t('common.back')}</span>
               </button>
               <button
                 type="button"
@@ -698,7 +699,7 @@ export const ReportIssuePage: React.FC = () => {
                 }}
                 className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
               >
-                <span>Continue to Location</span>
+                <span>{t('report.continueLocation')}</span>
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
@@ -708,10 +709,10 @@ export const ReportIssuePage: React.FC = () => {
         {step === 3 && (
           <div className="space-y-4">
             <h2 className="font-display text-lg font-semibold text-slate-900">
-              Step 3: Capture &amp; Confirm Location
+              {t('report.step3Title')}
             </h2>
             <p className="text-xs leading-relaxed text-slate-600">
-              Your coordinates, timestamp, and location accuracy help route the issue to the correct municipal ward. GPS coordinates are assistive metadata and are never claimed to be tamper-proof.
+              {t('report.step3Help')}
             </p>
 
             {locError && (
@@ -726,7 +727,7 @@ export const ReportIssuePage: React.FC = () => {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-3">
                 <p className="text-xs font-semibold text-slate-800">
-                  Option A: Browser GPS Detection
+                  {t('report.optionAGps')}
                 </p>
                 <button
                   type="button"
@@ -741,16 +742,16 @@ export const ReportIssuePage: React.FC = () => {
                   )}
                   <span>
                     {locState === 'captured' && !coords?.isDemo
-                      ? 'Retry GPS Capture'
-                      : 'Capture GPS Location'}
+                      ? t('report.retryGps')
+                      : t('report.captureGps')}
                   </span>
                 </button>
 
                 {coords && !coords.isDemo && (
                   <div className="rounded border border-emerald-200 bg-emerald-50 p-3 font-mono text-xs text-emerald-900 tabular-nums">
-                    Lat: {coords.lat} · Lng: {coords.lng}
+                    {t('report.lat')}: {coords.lat} · {t('report.lng')}: {coords.lng}
                     <br />
-                    Accuracy: ±{coords.accuracy ?? 'N/A'}m
+                    {t('report.accuracy')}: ±{coords.accuracy ?? 'N/A'}m
                   </div>
                 )}
               </div>
@@ -760,7 +761,7 @@ export const ReportIssuePage: React.FC = () => {
                   htmlFor="step3-ward"
                   className="block text-xs font-semibold text-slate-800"
                 >
-                  Option B: Demonstration Ward Selection
+                  {t('report.optionBWard')}
                 </label>
                 <select
                   id="step3-ward"
@@ -779,7 +780,7 @@ export const ReportIssuePage: React.FC = () => {
                   onClick={confirmManualWardLocation}
                   className="inline-flex min-h-10 items-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-800 hover:bg-slate-100 cursor-pointer"
                 >
-                  Use Selected Demonstration Ward
+                  {t('report.useSelectedWard')}
                 </button>
               </div>
             </div>
@@ -789,14 +790,14 @@ export const ReportIssuePage: React.FC = () => {
                 htmlFor="approx-area-input"
                 className="block text-xs font-medium text-slate-700"
               >
-                Public Landmark / Approximate Street Description (Avoid exact house numbers)
+                {t('report.landmarkLabel')}
               </label>
               <input
                 id="approx-area-input"
                 type="text"
                 value={approximateArea}
                 onChange={(e) => setApproximateArea(e.target.value)}
-                placeholder="e.g., Near 12th Main Bus Shelter, Ward 80"
+                placeholder={t('report.landmarkPlaceholder')}
                 className="mt-1 block min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900"
               />
             </div>
@@ -808,7 +809,7 @@ export const ReportIssuePage: React.FC = () => {
                 className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
                 <ChevronLeft className="h-4 w-4" />
-                <span>Back</span>
+                <span>{t('common.back')}</span>
               </button>
               <button
                 type="button"
@@ -816,7 +817,7 @@ export const ReportIssuePage: React.FC = () => {
                 onClick={() => setStep(4)}
                 className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
               >
-                <span>Continue to Description</span>
+                <span>{t('report.continueDescription')}</span>
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
@@ -826,7 +827,7 @@ export const ReportIssuePage: React.FC = () => {
         {step === 4 && (
           <div className="space-y-4">
             <h2 className="font-display text-lg font-semibold text-slate-900">
-              Step 4: Describe the Issue (Text or Regional Voice Input)
+              {t('report.step4Title')}
             </h2>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -835,14 +836,14 @@ export const ReportIssuePage: React.FC = () => {
                   htmlFor="issue-title"
                   className="block text-xs font-medium text-slate-700"
                 >
-                  Short Issue Headline
+                  {t('report.issueHeadlineLabel')}
                 </label>
                 <input
                   id="issue-title"
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder={`e.g., ${CATEGORY_MAP[selectedCategory].shortLabel} near ${approximateArea}`}
+                  placeholder={`${tc(selectedCategory, true)} — ${approximateArea}`}
                   className="mt-1 block min-h-11 w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900"
                 />
               </div>
@@ -852,7 +853,7 @@ export const ReportIssuePage: React.FC = () => {
                   htmlFor="voice-lang"
                   className="block text-xs font-medium text-slate-700"
                 >
-                  Voice Input Preferred Language
+                  {t('report.voiceLangLabel')}
                 </label>
                 <select
                   id="voice-lang"
@@ -862,9 +863,9 @@ export const ReportIssuePage: React.FC = () => {
                   }
                   className="mt-1 block min-h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
                 >
-                  {SUPPORTED_LANGUAGES.map((lang) => (
-                    <option key={lang.code} value={lang.code}>
-                      {lang.name} ({lang.nativeLabel})
+                  {SUPPORTED_LANGUAGES.map((l) => (
+                    <option key={l.code} value={l.code}>
+                      {l.name} ({l.nativeLabel})
                     </option>
                   ))}
                 </select>
@@ -879,7 +880,7 @@ export const ReportIssuePage: React.FC = () => {
                   className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white hover:bg-red-700 cursor-pointer"
                 >
                   <MicOff className="h-4 w-4" />
-                  <span>Stop Recording</span>
+                  <span>{t('report.stopRecording')}</span>
                 </button>
               ) : (
                 <button
@@ -888,7 +889,7 @@ export const ReportIssuePage: React.FC = () => {
                   className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-indigo-600 bg-indigo-50 px-4 py-2 text-xs font-semibold text-indigo-800 hover:bg-indigo-100 cursor-pointer"
                 >
                   <Mic className="h-4 w-4" />
-                  <span>Speak in Preferred Language</span>
+                  <span>{t('report.speakBtn')}</span>
                 </button>
               )}
 
@@ -897,7 +898,7 @@ export const ReportIssuePage: React.FC = () => {
                 onClick={insertSampleVoiceTranscript}
                 className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
-                Insert Sample Regional Voice Transcript
+                {t('report.insertSampleVoice')}
               </button>
             </div>
 
@@ -912,7 +913,7 @@ export const ReportIssuePage: React.FC = () => {
                 htmlFor="issue-description"
                 className="block text-xs font-medium text-slate-700"
               >
-                Editable Complaint Description (Review &amp; correct any speech-to-text output)
+                {t('report.descLabel')}
               </label>
               <textarea
                 id="issue-description"
@@ -922,7 +923,7 @@ export const ReportIssuePage: React.FC = () => {
                   setDescription(e.target.value);
                   setTranscriptVerified(false);
                 }}
-                placeholder="Describe visible hazards (e.g., exposed wire over puddle, deep pothole near bus stop, blocked drain)..."
+                placeholder={t('report.descPlaceholder')}
                 className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900"
               />
             </div>
@@ -935,7 +936,7 @@ export const ReportIssuePage: React.FC = () => {
                 className="mt-0.5"
               />
               <span>
-                I have reviewed and verified the written/converted description above before AI analysis and submission.
+                {t('report.verifyTranscriptCheck')}
               </span>
             </label>
 
@@ -946,7 +947,7 @@ export const ReportIssuePage: React.FC = () => {
                 className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
               >
                 <ChevronLeft className="h-4 w-4" />
-                <span>Back</span>
+                <span>{t('common.back')}</span>
               </button>
               <button
                 type="button"
@@ -954,7 +955,7 @@ export const ReportIssuePage: React.FC = () => {
                 onClick={runAnalysisForReview}
                 className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 cursor-pointer"
               >
-                <span>Analyze &amp; Review Submission</span>
+                <span>{t('report.analyzeReviewBtn')}</span>
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
@@ -964,14 +965,14 @@ export const ReportIssuePage: React.FC = () => {
         {step === 5 && (
           <div className="space-y-5">
             <h2 className="font-display text-lg font-semibold text-slate-900">
-              Step 5: AI Triage, Duplicate Check &amp; Final Review
+              {t('report.step5Title')}
             </h2>
 
             {analyzing ? (
               <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-slate-200 bg-slate-50 py-12">
                 <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
                 <p className="text-sm font-medium text-slate-700">
-                  Running safety severity assessment, department routing &amp; duplicate check...
+                  {t('report.analyzingSpinner')}
                 </p>
               </div>
             ) : (
@@ -989,10 +990,12 @@ export const ReportIssuePage: React.FC = () => {
                         <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-orange-700" />
                         <div>
                           <h3 className="font-display text-sm font-semibold text-slate-900">
-                            Potential Duplicate Complaint Detected ({Math.round((aiResult.duplicateScore ?? 0.6) * 100)}% match)
+                            {t('report.duplicateDetected', {
+                              pct: Math.round((aiResult.duplicateScore ?? 0.6) * 100),
+                            })}
                           </h3>
                           <p className="mt-0.5 text-xs text-slate-700">
-                            {aiResult.duplicateReason} Uncertain complaints are never automatically merged. Is this the same issue?
+                            {aiResult.duplicateReason} {t('report.duplicateHelp')}
                           </p>
                         </div>
                       </div>
@@ -1017,7 +1020,7 @@ export const ReportIssuePage: React.FC = () => {
                             {matchedDuplicateIssue.description}
                           </p>
                           <p className="font-mono text-xs text-slate-500 tabular-nums">
-                            {matchedDuplicateIssue.upvotedByUserIds.length} upvotes ·{' '}
+                            {matchedDuplicateIssue.upvotedByUserIds.length} {t('common.upvotes')} ·{' '}
                             {matchedDuplicateIssue.approximateArea}
                           </p>
                         </div>
@@ -1030,14 +1033,14 @@ export const ReportIssuePage: React.FC = () => {
                           className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 cursor-pointer"
                         >
                           <ThumbsUp className="h-3.5 w-3.5" />
-                          <span>Yes, Upvote Existing Complaint Instead</span>
+                          <span>{t('report.upvoteExistingBtn')}</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setDuplicateOverridden(true)}
                           className="inline-flex min-h-10 items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-medium text-slate-800 hover:bg-slate-50 cursor-pointer"
                         >
-                          No, This Is a Different Issue — Continue Reporting
+                          {t('report.continueNewBtn')}
                         </button>
                       </div>
                     </div>
@@ -1046,7 +1049,7 @@ export const ReportIssuePage: React.FC = () => {
                   <div className="grid gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-slate-500">
-                        Analysis Source
+                        {t('report.analysisSource')}
                       </p>
                       <p className="text-xs font-semibold text-slate-900">
                         {aiResult.modelOrRule}
@@ -1064,17 +1067,17 @@ export const ReportIssuePage: React.FC = () => {
                         {aiResult.needsHumanReview && (
                           <span className="inline-flex items-center gap-1 rounded border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800">
                             <ShieldAlert className="h-3.5 w-3.5" />
-                            Human Review Recommended
+                            {t('report.humanReviewBadge')}
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-slate-700">{aiResult.severityReason}</p>
                       <p className="text-xs text-slate-600">
                         <strong className="font-semibold text-slate-900">
-                          Routed Department(s):
+                          {t('report.routedDepts')}
                         </strong>{' '}
-                        {aiResult.assignedDepartments.join(' + ')}
-                        {aiResult.crossDepartmentRouting && ' (Cross-department)'}
+                        {aiResult.assignedDepartments.map((d) => tDept(d)).join(' + ')}
+                        {aiResult.crossDepartmentRouting && ` ${t('report.crossDept')}`}
                       </p>
                     </div>
                   </div>
@@ -1087,15 +1090,15 @@ export const ReportIssuePage: React.FC = () => {
                     />
                     <div className="space-y-1.5 sm:col-span-2">
                       <p className="text-xs font-medium text-indigo-600">
-                        {CATEGORY_MAP[aiResult.suggestedCategory].label}
+                        {tc(aiResult.suggestedCategory)}
                       </p>
                       <p className="text-sm font-semibold text-slate-900">
                         {title.trim() ||
-                          `${CATEGORY_MAP[selectedCategory].shortLabel} near ${approximateArea}`}
+                          `${tc(selectedCategory, true)} — ${approximateArea}`}
                       </p>
                       <p className="text-xs text-slate-600">{description}</p>
                       <p className="text-xs text-slate-500">
-                        Area: {approximateArea}
+                        {t('report.areaLabel')} {approximateArea}
                       </p>
                     </div>
                   </div>
@@ -1107,7 +1110,7 @@ export const ReportIssuePage: React.FC = () => {
                       className="inline-flex min-h-11 items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
                     >
                       <ChevronLeft className="h-4 w-4" />
-                      <span>Back &amp; Edit</span>
+                      <span>{t('report.backAndEdit')}</span>
                     </button>
 
                     <button
@@ -1116,7 +1119,7 @@ export const ReportIssuePage: React.FC = () => {
                       className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-700 cursor-pointer"
                     >
                       <CheckCircle2 className="h-4 w-4" />
-                      <span>Submit Civic Report</span>
+                      <span>{t('report.submitReportBtn')}</span>
                     </button>
                   </div>
                 </div>

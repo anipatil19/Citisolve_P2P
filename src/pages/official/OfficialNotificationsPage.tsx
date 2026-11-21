@@ -11,18 +11,20 @@ import {
   UserCheck,
 } from 'lucide-react';
 import {useCitiSolve} from '../../context/CitiSolveContext';
+import {useTranslation} from '../../i18n/useTranslation';
+import type {TranslationKey} from '../../i18n/en';
 import type {OfficialNotificationItem} from '../../types/civic';
 
-const NOTIFICATION_TYPE_LABELS: Record<OfficialNotificationItem['type'], string> = {
-  new_complaint: 'New Complaint',
-  critical_issue: 'Critical Issue',
-  assignment: 'Assignment',
-  approaching_deadline: 'Approaching Deadline',
-  overdue: 'Overdue SLA',
-  reassignment: 'Reassignment',
-  citizen_feedback: 'Citizen Feedback',
-  escalation: 'Escalation',
-};
+const NOTIFICATION_TYPES: OfficialNotificationItem['type'][] = [
+  'new_complaint',
+  'critical_issue',
+  'assignment',
+  'approaching_deadline',
+  'overdue',
+  'reassignment',
+  'citizen_feedback',
+  'escalation',
+];
 
 function renderTypeIcon(type: OfficialNotificationItem['type']) {
   switch (type) {
@@ -52,6 +54,7 @@ export const OfficialNotificationsPage: React.FC = () => {
     markOfficialNotificationRead,
     markAllOfficialNotificationsRead,
   } = useCitiSolve();
+  const {t} = useTranslation();
 
   const [typeFilter, setTypeFilter] = useState<'all' | OfficialNotificationItem['type']>('all');
   const [unreadOnly, setUnreadOnly] = useState(false);
@@ -71,10 +74,10 @@ export const OfficialNotificationsPage: React.FC = () => {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-xl font-bold text-[#0F172A]">
-            Official Notifications
+            {t('offNotif.title')}
           </h1>
           <p className="text-xs text-slate-600">
-            Jurisdiction alerts covering new complaints, critical safety hazards, assignments, SLA deadlines, citizen disputes, and escalations.
+            {t('offNotif.subtitle')}
           </p>
         </div>
 
@@ -85,7 +88,7 @@ export const OfficialNotificationsPage: React.FC = () => {
           className="inline-flex min-h-9 items-center gap-1.5 rounded-md border border-[#E2E8F0] bg-white px-3 text-xs font-semibold text-[#0F766E] hover:bg-slate-50 disabled:opacity-50 cursor-pointer"
         >
           <CheckCheck className="h-4 w-4" />
-          <span>Mark All Read ({unreadOfficialNotificationsCount})</span>
+          <span>{t('offNotif.markAllRead')} ({unreadOfficialNotificationsCount})</span>
         </button>
       </div>
 
@@ -101,22 +104,20 @@ export const OfficialNotificationsPage: React.FC = () => {
                 : 'bg-[#F8FAFC] text-slate-600 hover:bg-slate-100'
             }`}
           >
-            All Alerts
+            {t('common.all')}
           </button>
-          {(
-            Object.keys(NOTIFICATION_TYPE_LABELS) as OfficialNotificationItem['type'][]
-          ).map((t) => (
+          {NOTIFICATION_TYPES.map((nt) => (
             <button
-              key={t}
+              key={nt}
               type="button"
-              onClick={() => setTypeFilter(t)}
+              onClick={() => setTypeFilter(nt)}
               className={`rounded-md px-2.5 py-1 text-xs font-semibold cursor-pointer ${
-                typeFilter === t
+                typeFilter === nt
                   ? 'bg-[#0F766E] text-white'
                   : 'bg-[#F8FAFC] text-slate-600 hover:bg-slate-100'
               }`}
             >
-              {NOTIFICATION_TYPE_LABELS[t]}
+              {t(`offNotif.type.${nt}` as TranslationKey)}
             </button>
           ))}
         </div>
@@ -128,7 +129,7 @@ export const OfficialNotificationsPage: React.FC = () => {
             onChange={(e) => setUnreadOnly(e.target.checked)}
             className="h-4 w-4 rounded border-slate-300 text-[#0F766E]"
           />
-          <span>Unread only</span>
+          <span>{t('offNotif.unreadOnly')}</span>
         </label>
       </div>
 
@@ -136,7 +137,7 @@ export const OfficialNotificationsPage: React.FC = () => {
       <div className="space-y-2.5">
         {scopedNotifications.length === 0 ? (
           <div className="rounded-lg border border-[#E2E8F0] bg-white p-8 text-center text-xs text-slate-500">
-            No notifications match your current filter.
+            {t('offNotif.empty')}
           </div>
         ) : (
           scopedNotifications.map((notif) => (
@@ -153,7 +154,7 @@ export const OfficialNotificationsPage: React.FC = () => {
                 <div className="min-w-0 space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="rounded border border-[#E2E8F0] bg-white px-2 py-0.5 text-[10px] font-bold uppercase text-slate-700">
-                      {NOTIFICATION_TYPE_LABELS[notif.type]}
+                      {t(`offNotif.type.${notif.type}` as TranslationKey)}
                     </span>
                     <span className="text-[11px] text-slate-500">{notif.ward}</span>
                     {!notif.read && (
@@ -177,7 +178,7 @@ export const OfficialNotificationsPage: React.FC = () => {
                     onClick={() => markOfficialNotificationRead(notif.id)}
                     className="min-h-8 rounded-md border border-[#E2E8F0] bg-white px-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 cursor-pointer"
                   >
-                    Mark Read
+                    {t('offNotif.markRead')}
                   </button>
                 )}
                 {notif.complaintId && (
@@ -186,7 +187,7 @@ export const OfficialNotificationsPage: React.FC = () => {
                     onClick={() => markOfficialNotificationRead(notif.id)}
                     className="inline-flex min-h-8 items-center gap-1 rounded-md bg-[#0F766E] px-3 text-xs font-semibold text-white hover:bg-[#115E59]"
                   >
-                    <span>Open</span>
+                    <span>{t('offNotif.openBtn')}</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 )}
