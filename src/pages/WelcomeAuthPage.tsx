@@ -25,8 +25,6 @@ export const WelcomeAuthPage: React.FC = () => {
   const {
     appLanguage,
     setAppLanguage,
-    currentUser,
-    currentOfficial,
     loginAsDemoCitizen,
     loginWithCredentials,
     loginWithOfficialCredentials,
@@ -279,25 +277,6 @@ export const WelcomeAuthPage: React.FC = () => {
           </h1>
           <p className="mt-1 text-xs text-slate-600">{t('auth.signInSubtitle')}</p>
         </div>
-
-        {/* Active session shortcut if user navigated back to / */}
-        {(currentUser || currentOfficial) && (
-          <div className="mt-4 flex items-center justify-between gap-2 rounded-md border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs">
-            <span className="truncate text-slate-700">
-              {t('common.active')}:{' '}
-              <strong className="text-[#0F172A]">
-                {currentOfficial ? currentOfficial.name : currentUser?.name}
-              </strong>
-            </span>
-            <button
-              type="button"
-              onClick={() => navigate(currentOfficial ? '/official' : '/home')}
-              className="shrink-0 font-semibold text-[#0F766E] hover:underline cursor-pointer"
-            >
-              {t('offNav.dashboard')}
-            </button>
-          </div>
-        )}
 
         {/* Role Selector */}
         <div

@@ -134,7 +134,7 @@ export const te: TranslationDict = {
   'auth.forgotPassword': 'పాస్‌వర్డ్ మర్చిపోయారా?',
   'auth.forgotHelpCitizen': 'డెమో రీసెట్: పైన ఏదైనా ఫోన్/ఇమెయిల్ ఇచ్చి లాగిన్ నొక్కండి లేదా తక్షణ డెమో వాడండి.',
   'auth.loginBtn': 'లాగిన్',
-  'auth.continueGoogle': 'Google తో కొనసాగండి (డెమో)',
+  'auth.continueGoogle': 'Google తో కొనసాగండి',
   'auth.noAccount': 'ఖాతా లేదా?',
   'auth.createAccount': 'ఖాతా సృష్టించండి',
   'auth.instantCitizenDemo': 'తక్షణ పౌర డెమో',

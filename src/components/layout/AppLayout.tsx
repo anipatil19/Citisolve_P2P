@@ -239,10 +239,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
         {children}
       </main>
 
-      {/* Mobile-App 5-Tab Bottom Bar (Thumb Zone) */}
+      {/* Mobile-App 4-Tab Bottom Bar (Thumb Zone) */}
       <nav
         aria-label="Mobile app navigation"
-        className="fixed inset-x-0 bottom-0 z-40 grid h-16 grid-cols-5 items-center border-t border-slate-200 bg-white/95 px-1 backdrop-blur-md lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 grid h-16 grid-cols-4 items-center border-t border-slate-200 bg-white/95 px-1 backdrop-blur-md lg:hidden"
       >
         <NavLink
           to="/home"
@@ -267,16 +267,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({children}) => {
           <Clock className="h-5 w-5" />
           <span>{t('nav.track')}</span>
         </NavLink>
-
-        <div className="flex items-center justify-center">
-          <Link
-            to="/report"
-            aria-label={t('home.tileReport')}
-            className="flex h-12 w-12 -translate-y-2 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition-transform active:scale-95"
-          >
-            <Camera className="h-5 w-5" />
-          </Link>
-        </div>
 
         <NavLink
           to="/rewards"

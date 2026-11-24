@@ -140,7 +140,7 @@ export const en = {
   'auth.forgotPassword': 'Forgot password?',
   'auth.forgotHelpCitizen': 'Demo reset: enter any email or phone above and click Login, or use Instant Citizen Demo.',
   'auth.loginBtn': 'Login',
-  'auth.continueGoogle': 'Continue with Google (Demo)',
+  'auth.continueGoogle': 'Continue with Google',
   'auth.noAccount': "Don't have an account?",
   'auth.createAccount': 'Create account',
   'auth.instantCitizenDemo': 'Instant Citizen Demo',

@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   ThumbsUp,
   Wrench,
+  X,
 } from 'lucide-react';
 import {CivicImage} from '../components/common/CivicImage';
 import {LanguageSelector} from '../components/common/LanguageSelector';
@@ -49,10 +50,12 @@ export const StatusDashboardPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const trackerRef = useRef<HTMLElement | null>(null);
 
-  const initialFilter = (searchParams.get('filter') as StatusFilter) || 'all';
+  const paramFilter = searchParams.get('filter') as StatusFilter | null;
   const initialTrackId = searchParams.get('track');
+  const initialFilter: StatusFilter | null =
+    paramFilter ?? (initialTrackId ? 'all' : null);
 
-  const [filter, setFilter] = useState<StatusFilter>(initialFilter);
+  const [filter, setFilter] = useState<StatusFilter | null>(initialFilter);
   const [scope, setScope] = useState<'my_reports' | 'all_ward'>(
     initialFilter === 'escalated' ? 'all_ward' : 'my_reports'
   );
@@ -61,15 +64,17 @@ export const StatusDashboardPage: React.FC = () => {
   );
 
   useEffect(() => {
-    const paramFilter = searchParams.get('filter') as StatusFilter | null;
-    const paramTrack = searchParams.get('track');
-    if (paramFilter) {
-      setFilter(paramFilter);
-      if (paramFilter === 'escalated') setScope('all_ward');
+    const nextParamFilter = searchParams.get('filter') as StatusFilter | null;
+    const nextParamTrack = searchParams.get('track');
+    if (nextParamFilter) {
+      setFilter(nextParamFilter);
+      if (nextParamFilter === 'escalated') setScope('all_ward');
+    } else if (nextParamTrack) {
+      setFilter((prev) => prev ?? 'all');
+    } else {
+      setFilter(null);
     }
-    if (paramTrack) {
-      setTrackedIssueId(paramTrack);
-    }
+    setTrackedIssueId(nextParamTrack);
   }, [searchParams]);
 
   const myScopedBase = useMemo(() => {
@@ -107,6 +112,7 @@ export const StatusDashboardPage: React.FC = () => {
   }, [myScopedBase, sessionSubmittedIds]);
 
   const scopedIssues = useMemo(() => {
+    if (filter === null) return [];
     return myScopedBase.filter((issue) => {
       if (filter === 'all') return true;
       if (filter === 'submitted') {
@@ -138,15 +144,30 @@ export const StatusDashboardPage: React.FC = () => {
   }, [myScopedBase, filter, sessionSubmittedIds]);
 
   const trackedIssue = useMemo(() => {
+    if (filter === null) return null;
     if (trackedIssueId) {
       const explicit = issues.find((i) => i.id === trackedIssueId);
       if (explicit) return explicit;
     }
-    if (sessionSubmittedIssues.length > 0) {
+    if (filter === 'submitted' && sessionSubmittedIssues.length > 0) {
       return sessionSubmittedIssues[0];
     }
-    return scopedIssues[0] ?? myScopedBase[0] ?? null;
-  }, [trackedIssueId, issues, sessionSubmittedIssues, scopedIssues, myScopedBase]);
+    return scopedIssues[0] ?? null;
+  }, [filter, trackedIssueId, issues, sessionSubmittedIssues, scopedIssues]);
+
+  const handleSelectOptionTile = (nextFilter: Exclude<StatusFilter, 'all'>) => {
+    setFilter(nextFilter);
+    setTrackedIssueId(null);
+    const nextParams = new URLSearchParams();
+    nextParams.set('filter', nextFilter);
+    setSearchParams(nextParams, {replace: true});
+  };
+
+  const handleClearSelection = () => {
+    setFilter(null);
+    setTrackedIssueId(null);
+    setSearchParams(new URLSearchParams(), {replace: true});
+  };
 
   const handleSelectTrackIssue = (issueId: string) => {
     setTrackedIssueId(issueId);
@@ -156,13 +177,16 @@ export const StatusDashboardPage: React.FC = () => {
     trackerRef.current?.scrollIntoView({behavior: 'smooth', block: 'start'});
   };
 
-  const filterTabs: Array<{id: StatusFilter; label: string}> = [
-    {id: 'all', label: t('common.all')},
-    {id: 'submitted', label: t('status.tileSubmitted')},
-    {id: 'in_progress', label: t('status.tileInProgress')},
-    {id: 'resolved', label: t('common.resolved')},
-    {id: 'escalated', label: t('status.filterEscalated')},
-  ];
+  const selectedFilterLabel =
+    filter === 'submitted'
+      ? t('status.tileSubmitted')
+      : filter === 'in_progress'
+        ? t('status.tileInProgress')
+        : filter === 'resolved'
+          ? t('common.resolved')
+          : filter === 'escalated'
+            ? t('status.filterEscalated')
+            : t('common.all');
 
   const firstName = (currentUser?.name ?? 'Citizen').split(/\s+/)[0];
 
@@ -251,7 +275,7 @@ export const StatusDashboardPage: React.FC = () => {
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           <button
             type="button"
-            onClick={() => setFilter('submitted')}
+            onClick={() => handleSelectOptionTile('submitted')}
             className={`flex flex-col justify-between rounded-2xl border bg-white p-4 text-left shadow-sm transition-transform duration-150 active:scale-[0.98] cursor-pointer ${
               filter === 'submitted'
                 ? 'border-indigo-500 ring-2 ring-indigo-500/20'
@@ -280,7 +304,7 @@ export const StatusDashboardPage: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setFilter('in_progress')}
+            onClick={() => handleSelectOptionTile('in_progress')}
             className={`flex flex-col justify-between rounded-2xl border bg-white p-4 text-left shadow-sm transition-transform duration-150 active:scale-[0.98] cursor-pointer ${
               filter === 'in_progress'
                 ? 'border-amber-500 ring-2 ring-amber-500/20'
@@ -307,7 +331,7 @@ export const StatusDashboardPage: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setFilter('resolved')}
+            onClick={() => handleSelectOptionTile('resolved')}
             className={`flex flex-col justify-between rounded-2xl border bg-white p-4 text-left shadow-sm transition-transform duration-150 active:scale-[0.98] cursor-pointer ${
               filter === 'resolved'
                 ? 'border-emerald-500 ring-2 ring-emerald-500/20'
@@ -334,7 +358,7 @@ export const StatusDashboardPage: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setFilter('escalated')}
+            onClick={() => handleSelectOptionTile('escalated')}
             className={`flex flex-col justify-between rounded-2xl border bg-white p-4 text-left shadow-sm transition-transform duration-150 active:scale-[0.98] cursor-pointer ${
               filter === 'escalated'
                 ? 'border-red-500 ring-2 ring-red-500/20'
@@ -361,9 +385,11 @@ export const StatusDashboardPage: React.FC = () => {
         </div>
       </div>
 
+      {filter !== null && (
       <div className="space-y-5 px-4 lg:px-0">
         {/* Submitted Reports in Current Session */}
-        {sessionSubmittedIssues.length > 0 && (
+        {sessionSubmittedIssues.length > 0 &&
+          (filter === 'submitted' || filter === 'all') && (
           <section className="rounded-2xl border border-indigo-200 bg-white p-4 shadow-xs space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
@@ -598,34 +624,25 @@ export const StatusDashboardPage: React.FC = () => {
           </section>
         )}
 
-        {/* Filter Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5">
-          <div
-            role="tablist"
-            aria-label="Filter complaints by status"
-            className="inline-flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1"
-          >
-            {filterTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={filter === tab.id}
-                onClick={() => setFilter(tab.id)}
-                className={`min-h-9 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
-                  filter === tab.id
-                    ? 'bg-white text-indigo-700 shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        {/* Selected Status Section Summary Header */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+          <h2 className="font-display text-sm font-bold text-slate-900">
+            {selectedFilterLabel}
+          </h2>
 
-          <p className="font-mono text-xs text-slate-500 tabular-nums">
-            {t('status.reportsShown', {count: scopedIssues.length})}
-          </p>
+          <div className="flex items-center gap-3">
+            <p className="font-mono text-xs text-slate-500 tabular-nums">
+              {t('status.reportsShown', {count: scopedIssues.length})}
+            </p>
+            <button
+              type="button"
+              aria-label={t('common.close')}
+              onClick={handleClearSelection}
+              className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 cursor-pointer"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
         </div>
 
         {/* Complaint Feed List */}
@@ -799,6 +816,7 @@ export const StatusDashboardPage: React.FC = () => {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 };

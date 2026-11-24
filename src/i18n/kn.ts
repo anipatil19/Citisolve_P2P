@@ -134,7 +134,7 @@ export const kn: TranslationDict = {
   'auth.forgotPassword': 'ಪಾಸ್‌ವರ್ಡ್ ಮರೆತಿರಾ?',
   'auth.forgotHelpCitizen': 'ಡೆಮೊ ರೀಸೆಟ್: ಮೇಲೆ ಯಾವುದೇ ಫೋನ್/ಇಮೇಲ್ ಹಾಕಿ ಲಾಗಿನ್ ಒತ್ತಿ ಅಥವಾ ತ್ವರಿತ ಡೆಮೊ ಬಳಸಿ.',
   'auth.loginBtn': 'ಲಾಗಿನ್',
-  'auth.continueGoogle': 'Google ನೊಂದಿಗೆ ಮುಂದುವರೆಯಿರಿ (ಡೆಮೊ)',
+  'auth.continueGoogle': 'Google ನೊಂದಿಗೆ ಮುಂದುವರೆಯಿರಿ',
   'auth.noAccount': 'ಖಾತೆ ಇಲ್ಲವೇ?',
   'auth.createAccount': 'ಖಾತೆ ತೆರೆಯಿರಿ',
   'auth.instantCitizenDemo': 'ತ್ವರಿತ ನಾಗರಿಕ ಡೆಮೊ',

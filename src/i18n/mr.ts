@@ -134,7 +134,7 @@ export const mr: TranslationDict = {
   'auth.forgotPassword': 'पासवर्ड विसरलात?',
   'auth.forgotHelpCitizen': 'डेमो रीसेट: वर कोणताही ईमेल/फोन टाकून लॉगिन दाबा किंवा त्वरित डेमो वापरा.',
   'auth.loginBtn': 'लॉगिन करा',
-  'auth.continueGoogle': 'Google सह पुढे जा (डेमो)',
+  'auth.continueGoogle': 'Google सह पुढे जा',
   'auth.noAccount': 'खाते नाही का?',
   'auth.createAccount': 'नवीन खाते तयार करा',
   'auth.instantCitizenDemo': 'त्वरित नागरिक डेमो',

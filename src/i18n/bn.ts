@@ -134,7 +134,7 @@ export const bn: TranslationDict = {
   'auth.forgotPassword': 'পাসওয়ার্ড ভুলে গেছেন?',
   'auth.forgotHelpCitizen': 'ডেমো রিসেট: উপরে যেকোনো ফোন/ইমেইল লিখে লগইন করুন বা দ্রুত ডেমো ব্যবহার করুন।',
   'auth.loginBtn': 'লগইন করুন',
-  'auth.continueGoogle': 'Google দিয়ে চালিয়ে যান (ডেমো)',
+  'auth.continueGoogle': 'Google দিয়ে চালিয়ে যান',
   'auth.noAccount': 'অ্যাকাউন্ট নেই?',
   'auth.createAccount': 'নতুন অ্যাকাউন্ট তৈরি করুন',
   'auth.instantCitizenDemo': 'তাৎক্ষণিক নাগরিক ডেমো',

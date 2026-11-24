@@ -11,6 +11,7 @@ import {
   MapPin,
   Navigation,
   ThumbsUp,
+  X,
 } from 'lucide-react';
 import {CivicImage} from '../components/common/CivicImage';
 import {LanguageSelector} from '../components/common/LanguageSelector';
@@ -55,6 +56,7 @@ export const CitizenHomePage: React.FC = () => {
   const [voteFeedback, setVoteFeedback] = useState<string | null>(null);
   const [permStatusMsg, setPermStatusMsg] = useState<string | null>(null);
   const [alertsOpen, setAlertsOpen] = useState(false);
+  const [showNearbyList, setShowNearbyList] = useState(false);
 
   const firstName = (currentUser?.name ?? 'Citizen').split(/\s+/)[0];
 
@@ -126,9 +128,12 @@ export const CitizenHomePage: React.FC = () => {
     window.setTimeout(() => setPermStatusMsg(null), 4500);
   };
 
-  const scrollToMap = () => {
-    const el = document.getElementById('home-map-section');
-    el?.scrollIntoView({behavior: 'smooth', block: 'start'});
+  const handleOpenNearbyIssues = () => {
+    setShowNearbyList(true);
+    window.setTimeout(() => {
+      const el = document.getElementById('nearby-issues-section');
+      el?.scrollIntoView({behavior: 'smooth', block: 'start'});
+    }, 60);
   };
 
   const needsLocationPerm = currentUser?.locationPermission !== 'granted';
@@ -250,8 +255,10 @@ export const CitizenHomePage: React.FC = () => {
 
           <button
             type="button"
-            onClick={scrollToMap}
-            className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-sm transition-transform duration-150 active:scale-[0.98] hover:border-teal-200 cursor-pointer"
+            onClick={handleOpenNearbyIssues}
+            className={`flex flex-col justify-between rounded-2xl border bg-white p-4 text-left shadow-sm transition-transform duration-150 active:scale-[0.98] hover:border-teal-200 cursor-pointer ${
+              showNearbyList ? 'border-teal-400 ring-2 ring-teal-500/20' : 'border-slate-200/80'
+            }`}
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white">
               <MapPin className="h-5 w-5" />
@@ -479,7 +486,7 @@ export const CitizenHomePage: React.FC = () => {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-12">
-            <div className="lg:col-span-7 space-y-3">
+            <div className={prioritizedIssue ? 'lg:col-span-7' : 'lg:col-span-12'}>
               <LeafletWardMap
                 issues={filteredIssues}
                 selectedIssueId={prioritizedIssue?.id ?? null}
@@ -487,8 +494,10 @@ export const CitizenHomePage: React.FC = () => {
                 radiusKm={radiusKm}
                 onChangeRadiusKm={setRadiusKm}
               />
+            </div>
 
-              {prioritizedIssue && (
+            {prioritizedIssue && (
+              <div className="lg:col-span-5">
                 <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm space-y-3">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -554,104 +563,122 @@ export const CitizenHomePage: React.FC = () => {
                     </Link>
                   </div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+          </div>
+        </section>
 
-            <div className="lg:col-span-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <h2 className="font-display text-lg font-bold text-slate-900">
-                  {t('home.nearYouTitle')}
-                </h2>
+        {/* Nearby Issues List — shown only after clicking "Issues near me" */}
+        {showNearbyList && (
+          <section id="nearby-issues-section" className="space-y-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="font-display text-lg font-bold text-slate-900">
+                {t('home.nearYouTitle')}
+              </h2>
+              <div className="flex items-center gap-3">
                 <Link
                   to="/history"
                   className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
                 >
                   {t('common.viewAll')} &gt;
                 </Link>
-              </div>
-
-              <div className="space-y-3">
-                {filteredIssues.length === 0 ? (
-                  <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-xs text-slate-600">
-                    {t('common.noMatches')}
-                  </div>
-                ) : (
-                  filteredIssues.slice(0, 5).map((item) => {
-                    const hasVoted =
-                      currentUser &&
-                      item.upvotedByUserIds.includes(currentUser.id);
-                    return (
-                      <article
-                        key={item.id}
-                        className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs space-y-3"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="text-sm font-bold text-slate-900">
-                              {item.reporterAlias}
-                            </p>
-                            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                              <span className="rounded-md bg-amber-50 px-2 py-0.5 font-medium text-amber-800">
-                                {tc(item.category, true)}
-                              </span>
-                              <SeverityLabel severity={item.safetySeverity} compact />
-                              <ResolutionStatusLabel status={item.status} />
-                            </div>
-                          </div>
-                          <span className="text-xs text-slate-400 whitespace-nowrap">
-                            {formatRelativeDays(item.createdAt)}
-                          </span>
-                        </div>
-
-                        <p className="text-sm leading-relaxed text-slate-700 line-clamp-2">
-                          {item.description}
-                        </p>
-
-                        <button
-                          type="button"
-                          onClick={() => setSelectedIssueId(item.id)}
-                          className="block w-full overflow-hidden rounded-xl cursor-pointer text-left"
-                        >
-                          <CivicImage
-                            src={item.photoUrl}
-                            alt={item.title}
-                            className="h-40 w-full rounded-xl object-cover"
-                          />
-                        </button>
-
-                        <div className="flex items-center justify-between pt-1">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleVote(item.id)}
-                            className={`inline-flex min-h-10 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold cursor-pointer ${
-                              hasVoted
-                                ? 'bg-indigo-50 text-indigo-700'
-                                : 'text-slate-600 hover:bg-slate-50'
-                            }`}
-                          >
-                            <ThumbsUp className="h-4 w-4" />
-                            <span className="font-mono tabular-nums">
-                              {item.upvotedByUserIds.length}
-                            </span>
-                            <span>{hasVoted ? t('common.upvoted') : t('common.upvote')}</span>
-                          </button>
-
-                          <Link
-                            to={`/issues/${item.id}`}
-                            className="inline-flex min-h-10 items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
-                          >
-                            <span>{t('common.viewDetails')}</span>
-                            <ArrowUpRight className="h-3.5 w-3.5" />
-                          </Link>
-                        </div>
-                      </article>
-                    );
-                  })
-                )}
+                <button
+                  type="button"
+                  aria-label={t('common.close')}
+                  onClick={() => setShowNearbyList(false)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 cursor-pointer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
             </div>
-          </div>
-        </section>
+
+            {filteredIssues.length === 0 ? (
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-xs text-slate-600">
+                {t('common.noMatches')}
+              </div>
+            ) : (
+              <div className="grid gap-3 md:grid-cols-2">
+                {filteredIssues.slice(0, 6).map((item) => {
+                  const hasVoted =
+                    currentUser &&
+                    item.upvotedByUserIds.includes(currentUser.id);
+                  return (
+                    <article
+                      key={item.id}
+                      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs space-y-3"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="text-sm font-bold text-slate-900">
+                            {item.reporterAlias}
+                          </p>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                            <span className="rounded-md bg-amber-50 px-2 py-0.5 font-medium text-amber-800">
+                              {tc(item.category, true)}
+                            </span>
+                            <SeverityLabel severity={item.safetySeverity} compact />
+                            <ResolutionStatusLabel status={item.status} />
+                          </div>
+                        </div>
+                        <span className="text-xs text-slate-400 whitespace-nowrap">
+                          {formatRelativeDays(item.createdAt)}
+                        </span>
+                      </div>
+
+                      <p className="text-sm leading-relaxed text-slate-700 line-clamp-2">
+                        {item.description}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedIssueId(item.id);
+                          document
+                            .getElementById('home-map-section')
+                            ?.scrollIntoView({behavior: 'smooth', block: 'start'});
+                        }}
+                        className="block w-full overflow-hidden rounded-xl cursor-pointer text-left"
+                      >
+                        <CivicImage
+                          src={item.photoUrl}
+                          alt={item.title}
+                          className="h-40 w-full rounded-xl object-cover"
+                        />
+                      </button>
+
+                      <div className="flex items-center justify-between pt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleVote(item.id)}
+                          className={`inline-flex min-h-10 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold cursor-pointer ${
+                            hasVoted
+                              ? 'bg-indigo-50 text-indigo-700'
+                              : 'text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          <ThumbsUp className="h-4 w-4" />
+                          <span className="font-mono tabular-nums">
+                            {item.upvotedByUserIds.length}
+                          </span>
+                          <span>{hasVoted ? t('common.upvoted') : t('common.upvote')}</span>
+                        </button>
+
+                        <Link
+                          to={`/issues/${item.id}`}
+                          className="inline-flex min-h-10 items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                        >
+                          <span>{t('common.viewDetails')}</span>
+                          <ArrowUpRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
 
         <section
           aria-label={t('home.summaryTitle')}

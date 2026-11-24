@@ -134,7 +134,7 @@ export const ta: TranslationDict = {
   'auth.forgotPassword': 'கடவுச்சொல் மறந்துவிட்டதா?',
   'auth.forgotHelpCitizen': 'டெமோ மீட்டமைப்பு: மேலே ஏதேனும் எண்/மின்னஞ்சல் உள்ளிட்டு உள்நுழையவும்.',
   'auth.loginBtn': 'உள்நுழைக',
-  'auth.continueGoogle': 'Google மூலம் தொடரவும் (டெமோ)',
+  'auth.continueGoogle': 'Google மூலம் தொடரவும்',
   'auth.noAccount': 'கணக்கு இல்லையா?',
   'auth.createAccount': 'கணக்கை உருவாக்கவும்',
   'auth.instantCitizenDemo': 'உடனடி குடிமகன் டெமோ',
